@@ -597,7 +597,16 @@ body[dir='ltr'] {
     max-height: none;
     background: #babcbf;
     width: 33px;
-    left: 15px;
+    left: 10px;
+}
+[class^="ReactFlagsSelect-module_selectFlag"] {
+     font-size: 21px;
+}[class^="ReactFlagsSelect-module_selectValue"] {
+     margin: 0 !important;
+     padding: 0 !important;
+}
+[class^="ReactFlagsSelect-module_selectOption"]:hover {
+     font-size: 21px;
 }
 
 [class^="ReactFlagsSelect-module_selectBtn"] {
@@ -653,7 +662,7 @@ body[dir='rtl'] .container {
 .App[dir='rtl'] .dropdown-toggle::after {
     margin-right: .5rem !important;
 }.App[dir='rtl'] [class^="ReactFlagsSelect-module_selectOption"] {
-     right: 15px;
+     right: 10px;
 }
 .App[dir='rtl'] .header {
     padding-left: 0;
@@ -663,4 +672,7 @@ body[dir='rtl'] .container {
 .App[dir='rtl'] .ui-switch {
     margin-left: 0 !important;
     margin-right: 1rem !important;
+}
+.header {
+    padding-top: 21px;
 }
