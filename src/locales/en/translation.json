@@ -1,0 +1,14 @@
+{
+  "passwordMismatch": "Password and Confirm Password do not match.",
+  "completeRecaptcha": "Please complete the reCAPTCHA.",
+  "registrationSuccess": "Registration successful. Please check your email for verification.",
+  "unexpectedError": "An unexpected error occurred. Please try again.",
+  "serverConnectionError": "Could not connect to the server. Please try again.",
+  "fullName": "Full Name",
+  "emailAddress": "Your Email Address",
+  "enterPassword": "Enter Password",
+  "confirmPassword": "Confirm Password",
+  "mobileNumber": "Mobile Number",
+  "registering": "Registering...",
+  "register": "Register"
+}

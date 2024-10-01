@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 91.75 105.94">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        stroke-width: 0px;
+      }
+
+      .cls-7 {
+        isolation: isolate;
+      }
+
+      .cls-2 {
+        fill: #231f20;
+        mix-blend-mode: multiply;
+        opacity: .1;
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient-4);
+        opacity: .3;
+      }
+
+      .cls-4 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-5 {
+        fill: url(#linear-gradient-3);
+      }
+
+      .cls-6 {
+        fill: url(#radial-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="-1828.65" y1="-404.67" x2="-1722.71" y2="-404.67" gradientTransform="translate(-358.8 1828.65) rotate(90)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a6a8ac"/>
+      <stop offset="0" stop-color="#a6a8ac"/>
+      <stop offset=".18" stop-color="#c6c7ca"/>
+      <stop offset=".37" stop-color="#dfe0e1"/>
+      <stop offset=".56" stop-color="#f1f1f1"/>
+      <stop offset=".76" stop-color="#fbfbfb"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="-1825.87" y1="-404.67" x2="-1725.48" y2="-404.67" gradientTransform="translate(-358.8 1828.65) rotate(90)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".24" stop-color="#fbfbfb"/>
+      <stop offset=".44" stop-color="#f1f1f1"/>
+      <stop offset=".63" stop-color="#dfe0e1"/>
+      <stop offset=".82" stop-color="#c6c7ca"/>
+      <stop offset="1" stop-color="#a6a8ac"/>
+      <stop offset="1" stop-color="#a6a8ac"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-3" x1="19.95" y1="27.05" x2="79.47" y2="86.56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f3f3f3"/>
+      <stop offset=".24" stop-color="#ebebea"/>
+      <stop offset=".62" stop-color="#d8d6d3"/>
+      <stop offset="1" stop-color="#c1bdb6"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-4" x1="43.49" y1="57.81" x2="43.49" y2="5.08" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".03" stop-color="rgba(255, 255, 255, .95)" stop-opacity=".95"/>
+      <stop offset=".14" stop-color="rgba(255, 255, 255, .73)" stop-opacity=".73"/>
+      <stop offset=".25" stop-color="rgba(255, 255, 255, .53)" stop-opacity=".53"/>
+      <stop offset=".37" stop-color="rgba(255, 255, 255, .37)" stop-opacity=".37"/>
+      <stop offset=".49" stop-color="rgba(255, 255, 255, .24)" stop-opacity=".24"/>
+      <stop offset=".61" stop-color="rgba(255, 255, 255, .13)" stop-opacity=".13"/>
+      <stop offset=".74" stop-color="rgba(255, 255, 255, .06)" stop-opacity=".06"/>
+      <stop offset=".86" stop-color="rgba(255, 255, 255, .01)" stop-opacity=".01"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="radial-gradient" cx="23.09" cy="13.24" fx="23.09" fy="13.24" r="25.77" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset=".12" stop-color="rgba(255, 255, 255, .77)" stop-opacity=".77"/>
+      <stop offset=".25" stop-color="rgba(255, 255, 255, .57)" stop-opacity=".57"/>
+      <stop offset=".37" stop-color="rgba(255, 255, 255, .39)" stop-opacity=".39"/>
+      <stop offset=".5" stop-color="rgba(255, 255, 255, .25)" stop-opacity=".25"/>
+      <stop offset=".62" stop-color="rgba(255, 255, 255, .14)" stop-opacity=".14"/>
+      <stop offset=".75" stop-color="rgba(255, 255, 255, .06)" stop-opacity=".06"/>
+      <stop offset=".87" stop-color="rgba(255, 255, 255, .02)" stop-opacity=".02"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g class="cls-7">
+    <g id="Layer_2" data-name="Layer 2">
+      <g id="Layer_1-2" data-name="Layer 1">
+        <polygon class="cls-1" points="0 26.49 45.87 0 91.75 26.49 91.75 79.46 45.87 105.94 0 79.46 0 26.49"/>
+        <polygon class="cls-4" points="2.4 78.07 2.4 27.87 45.87 2.77 89.35 27.87 89.35 78.07 45.87 103.17 2.4 78.07"/>
+        <polygon class="cls-5" points="4.8 76.68 4.8 29.26 45.87 5.54 86.95 29.26 86.95 76.68 45.87 100.4 4.8 76.68"/>
+        <polygon class="cls-2" points="84.24 27.66 84.25 75.25 45.66 97.2 4.8 74.26 4.8 76.61 45.87 100.32 86.95 76.61 86.95 29.19 84.24 27.66"/>
+        <path class="cls-3" d="M82.03,26.33S51.09,58.93,4.96,52.97v-23.71L46.03,5.54l36,20.79Z"/>
+        <path class="cls-6" d="M.15,26.49L46.03,0S21.72,16.19.15,26.49Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

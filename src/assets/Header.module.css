@@ -1,0 +1,44 @@
+/* src/components/Header.module.css */
+
+/* Custom styles for the main select button */
+:global(.custom-react-flags-select) {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Custom styles for the dropdown menu */
+:global(.custom-react-flags-dropdown) {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Target classes that start with 'ReactFlagsSelect-module_selectFlag' */
+:global([class^="ReactFlagsSelect-module_selectFlag"]) {
+    width: 24px;
+    height: 24px;
+}
+
+/* Hide any text nodes if they still exist */
+:global(.ReactFlagsSelect-module_selectBtn__2o7Hl > span) {
+    display: none;
+}
+
+/* Style the dropdown flags */
+:global([class^="ReactFlagsSelect-module_selectOptionValue"]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* Remove any text from dropdown options */
+:global([class^="ReactFlagsSelect-module_selectOptionValue"])::after {
+    content: none;
+}
