@@ -92,7 +92,7 @@ const Login = () => {
                         ref={recaptchaRef}
                         sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR" // جایگزین کردن با Site Key واقعی
                         onChange={handleRecaptcha}
-                        theme="light"
+                        theme="dark"
                     />
                 </div>
                 {error && <p className="text-danger text-center">{error}</p>}

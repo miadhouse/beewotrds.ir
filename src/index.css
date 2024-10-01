@@ -21,6 +21,7 @@ body {
     background: radial-gradient(circle, rgba(255, 255, 255, 1) 48%, rgba(166, 168, 172, 1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#a6a8ac", GradientType=1);
 }
+
 body[dir='rtl'] {
     direction: rtl;
     text-align: right;
@@ -30,6 +31,7 @@ body[dir='ltr'] {
     direction: ltr;
     text-align: left;
 }
+
 .center {
     margin: 0 auto;
 }
@@ -37,7 +39,7 @@ body[dir='ltr'] {
 .main-svg {
     position: absolute;
     width: 80%;
-    z-index:-1; /* تغییر z-index به مقدار مثبت */
+    z-index: -1; /* تغییر z-index به مقدار مثبت */
     left: 50%;
     margin-top: 28%;
     transform: translate(-50%, 0);
@@ -68,7 +70,8 @@ body[dir='ltr'] {
     z-index: -10 !important;
     width: 100px;
 }
-.widget canvas{
+
+.widget canvas {
     height: 41px !important;
 }
 
@@ -377,11 +380,15 @@ body[dir='ltr'] {
         transform: scale(0.95, 0.95);
     }
 }
-.dropdown-menu{
+
+.dropdown-menu {
     z-index: 999 !important;
-}.dropdown-item{
-     z-index: 999 !important;
- }
+}
+
+.dropdown-item {
+    z-index: 999 !important;
+}
+
 .header-right {
     position: absolute;
     z-index: 1;
@@ -478,16 +485,20 @@ body[dir='ltr'] {
     width: 0;
     height: 0;
 }
+
 .small, small {
     font-size: .675em;
 }
-.offcanvas.offcanvas-bottom{
+
+.offcanvas.offcanvas-bottom {
     margin: 0 auto;
     width: 90%;
     bottom: 10px;
     border-radius: 20px;
     height: auto;
-}/* AuthPage.css */
+}
+
+/* AuthPage.css */
 .auth-container {
     position: relative;
     width: 100%;
@@ -505,66 +516,78 @@ body[dir='ltr'] {
     transform: translateX(-50%);
     z-index: 1;
 }
-.auth-holder{
+
+.auth-holder {
     margin-top: 150px;
 }
+
 .auth-box {
     box-shadow: none;
     position: relative;
     background-color: rgba(13, 1, 1, 0);
     z-index: 1; /* اطمینان از نمایش صحیح فرم‌های ورود و ثبت‌نام */
 }
+
 .nav-tabs .nav-link {
     border: none;
     margin-bottom: 0;
 }
-.nav-tabs{
+
+.nav-tabs {
     border-bottom: 0 !important;
 }
+
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-    background: rgb(255,255,255);
-    background: -moz-linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,196,0,1) 100%);
-    background: -webkit-linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,196,0,1) 100%);
-    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,196,0,1) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff",endColorstr="#ffc400",GradientType=1);
+    background: rgb(255, 255, 255);
+    background: -moz-linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 196, 0, 1) 100%);
+    background: -webkit-linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 196, 0, 1) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 196, 0, 1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffc400", GradientType=1);
 }
+
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
     background: #fff;
     color: #494949;
     background: linear-gradient(180deg, #00000045, #ffc400);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff",endColorstr="#ffc400",GradientType=1);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffc400", GradientType=1);
 }
+
 .authInput {
     background-color: #fff0;
     border: 0;
     border-left: 3px solid #00000029;
     border-bottom: 3px solid #00000029;
 }
+
 .authInput:focus {
     background-color: #ffffff57;
-    box-shadow: 0 0 0 ;
+    box-shadow: 0 0 0;
     outline: 0;
     border-color: #00000029;
 }
-.authNavTanBtn{
+
+.authNavTanBtn {
     color: #917300;
 }
-.auth-links a{
+
+.auth-links a {
     color: #4f4f4f;
     text-decoration: none;
 }
-.authPushBtn{
+
+.authPushBtn {
     background: #e6b700;
 
 }
+
 .nav-link {
     color: #00000066;
 }
+
 [class^="ReactFlagsSelect-module_selectFlag"] {
     border: 1px solid rgba(13, 17, 23, 0);
 }
 
-/* Target classes that start with 'ReactFlagsSelect-module_selectOptionValue' */
 [class^="ReactFlagsSelect-module_selectOption"] {
     margin: 0 !important;
     padding: 0 !important;
@@ -574,7 +597,9 @@ body[dir='ltr'] {
     max-height: none;
     background: #babcbf;
     width: 33px;
+    left: 15px;
 }
+
 [class^="ReactFlagsSelect-module_selectBtn"] {
     cursor: pointer;
     width: 100%;
@@ -603,17 +628,39 @@ body[dir='rtl'] .container {
     margin-left: auto;
     margin-right: auto;
 }
+
+
 .App[dir='rtl'] .header-right {
     left: 0;
     right: auto;
 }
-.App[dir='rtl'] .profileDiv {
-    direction: ltr;
+.profileDivChild{
+    float: right !important;
+
+}
+.App[dir='rtl'] .profileDivChild {
     float: left !important;
-}.App[dir='rtl'] .header  {
-     padding-left: 0;
-     padding-right: 15px;
- }.App[dir='rtl'] .ui-switch  {
-      margin-left: 0 !important;
-      margin-right: 1rem !important;
-  }
+}
+.profileEmail{
+    margin-right: .5rem !important;
+}
+.App[dir='rtl'] .profileEmail {
+    margin-left: .5rem !important;
+}
+.dropdown-toggle::after {
+    margin-right: .5rem !important;
+}
+.App[dir='rtl'] .dropdown-toggle::after {
+    margin-right: .5rem !important;
+}.App[dir='rtl'] [class^="ReactFlagsSelect-module_selectOption"] {
+     right: 15px;
+}
+.App[dir='rtl'] .header {
+    padding-left: 0;
+    padding-right: 15px;
+}
+
+.App[dir='rtl'] .ui-switch {
+    margin-left: 0 !important;
+    margin-right: 1rem !important;
+}

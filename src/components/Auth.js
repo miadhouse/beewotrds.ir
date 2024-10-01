@@ -61,7 +61,7 @@ const Auth = () => {
                                 className="mb-3"
                                 justify
                             >
-                                <Tab className='authNavTanBtn' eventKey="login" title={t('loginn')}>
+                                <Tab className='authNavTanBtn' eventKey="login" title={t('login')}>
                                     <Login />
                                 </Tab>
                                 <Tab className='authNavTanBtn' eventKey="register" title={t('register')}>

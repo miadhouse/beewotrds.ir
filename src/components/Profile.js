@@ -16,10 +16,10 @@ const Profile = () => {
 
     return (
         <div className="header-right">
-            <Dropdown className="float-end" align="end">
+            <Dropdown className="profileDivChild" align="end">
                 <Dropdown.Toggle variant="light" id="dropdown-basic" className="d-flex align-items-center border-0 bg-transparent">
                     <div className="d-flex align-items-center">
-                        <div className="me-2">
+                        <div className="profileEmail">
                             {user ? (
                                 <small className="text-dark">{user.userName}</small>
                             ) : (
