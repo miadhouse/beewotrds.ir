@@ -6,6 +6,8 @@ use App\Models\Flashcard;
 use App\Services\RequestValidator;
 use App\Services\SessionManager;
 use App\Services\JWTManager;
+use App\Middleware\ValidationMiddleware;
+use App\Exceptions\ApiException;
 
 class FlashcardController
 {
@@ -13,47 +15,53 @@ class FlashcardController
     private RequestValidator $validator;
     private SessionManager $sessionManager;
     private JWTManager $jwtManager;
+    private ValidationMiddleware $validationMiddleware;
 
     public function __construct(
         Flashcard        $flashcardModel,
         RequestValidator $validator,
         SessionManager   $sessionManager,
-        JWTManager       $jwtManager
+        JWTManager       $jwtManager,
+        ValidationMiddleware $validationMiddleware
     )
     {
         $this->flashcardModel = $flashcardModel;
         $this->validator = $validator;
         $this->sessionManager = $sessionManager;
         $this->jwtManager = $jwtManager;
+        $this->validationMiddleware = $validationMiddleware;
     }
 
     /**
-     * Create a new flashcard
+     * ایجاد یک فلشکارد جدید
+     *
+     * @param array $request
+     * @return array
+     * @throws ApiException
      */
     public function createFlashcard($request): array
     {
-        // Authenticate user
+        // احراز هویت کاربر
         $authResult = $this->authenticate($request);
         if ($authResult['status'] !== 200) {
             return $authResult;
         }
         $userId = $authResult['userId'];
 
-        // Validate input using the updated RequestValidator
-        $this->validator->validate($request, [
+        // قوانین اعتبارسنجی
+        $rules = [
             'categoryId'    => ['categoryId'],
             'baseLang'      => ['language'],
             'translateLang' => ['language'],
             'frontWord'     => ['word'],
             'backWord'      => ['word'],
             'level'         => ['level']
-        ]);
+        ];
 
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
-        }
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
 
-        // Prepare data
+        // آماده‌سازی داده‌ها
         $data = [
             'userId'         => $userId,
             'categoryId'     => $request['categoryId'],
@@ -67,103 +75,115 @@ class FlashcardController
             'status'         => 'active'
         ];
 
-        // Create flashcard
+        // ایجاد فلشکارد
         $flashcardId = $this->flashcardModel->createFlashcard($data);
         if ($flashcardId) {
             return ['status' => 201, 'message' => 'Flashcard created successfully', 'flashcardId' => $flashcardId];
         }
 
-        return ['status' => 500, 'message' => 'Failed to create flashcard'];
+        throw new ApiException('Failed to create flashcard', 500);
     }
+
     /**
-     * Retrieve all flashcards for the authenticated user
+     * دریافت تمام فلشکاردهای کاربر
+     *
+     * @param array $request
+     * @return array
+     * @throws ApiException
      */
     public function getFlashcards($request): array
     {
-        // Authenticate user
+        // احراز هویت کاربر
         $authResult = $this->authenticate($request);
         if ($authResult['status'] !== 200) {
             return $authResult;
         }
         $userId = $authResult['userId'];
 
-        // Optionally handle filtering via query parameters
-        // For simplicity, we'll retrieve all flashcards for the user
-
+        // دریافت فلشکاردها
         $flashcards = $this->flashcardModel->findByUserId($userId);
         if ($flashcards !== false) {
             return ['status' => 200, 'data' => $flashcards];
         }
 
-        return ['status' => 500, 'message' => 'Failed to retrieve flashcards'];
+        throw new ApiException('Failed to retrieve flashcards', 500);
     }
 
     /**
-     * Retrieve a single flashcard by ID
+     * دریافت یک فلشکارد بر اساس ID
+     *
+     * @param array $request
+     * @return array
+     * @throws ApiException
      */
     public function getFlashcardById($request): array
     {
-        // Authenticate user
+        // احراز هویت کاربر
         $authResult = $this->authenticate($request);
         if ($authResult['status'] !== 200) {
             return $authResult;
         }
         $userId = $authResult['userId'];
 
-        // Validate ID
-        $flashcardId = $request['id'] ?? null;
-        if (!$flashcardId || !is_numeric($flashcardId)) {
-            return ['status' => 400, 'message' => 'Valid flashcard ID is required'];
-        }
+        // قوانین اعتبارسنجی
+        $rules = [
+            'id' => ['categoryId'] // می‌توانید یک ولیدیتور مخصوص برای ID تعریف کنید
+        ];
 
-        // Retrieve flashcard
-        $flashcard = $this->flashcardModel->findById((int)$flashcardId);
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت فلشکارد
+        $flashcardId = (int)$request['id'];
+        $flashcard = $this->flashcardModel->findById($flashcardId);
+
         if (!$flashcard || $flashcard['userId'] != $userId) {
-            return ['status' => 404, 'message' => 'Flashcard not found'];
+            throw new ApiException('Flashcard not found', 404);
         }
 
         return ['status' => 200, 'data' => $flashcard];
     }
 
     /**
-     * Update an existing flashcard
+     * به‌روزرسانی یک فلشکارد موجود
+     *
+     * @param array $request
+     * @return array
+     * @throws ApiException
      */
     public function updateFlashcard($request): array
     {
-        // Authenticate user
+        // احراز هویت کاربر
         $authResult = $this->authenticate($request);
         if ($authResult['status'] !== 200) {
             return $authResult;
         }
         $userId = $authResult['userId'];
 
-        // Validate ID
-        $flashcardId = $request['id'] ?? null;
-        if (!$flashcardId || !is_numeric($flashcardId)) {
-            return ['status' => 400, 'message' => 'Valid flashcard ID is required'];
-        }
-
-        // Retrieve flashcard
-        $flashcard = $this->flashcardModel->findById((int)$flashcardId);
-        if (!$flashcard || $flashcard['userId'] != $userId) {
-            return ['status' => 404, 'message' => 'Flashcard not found'];
-        }
-
-        // Validate input
-        $this->validator->validate([
+        // قوانین اعتبارسنجی
+        $rules = [
+            'id'            => ['categoryId'],
             'categoryId'    => ['categoryId'],
             'baseLang'      => ['language'],
             'translateLang' => ['language'],
             'frontWord'     => ['word'],
             'backWord'      => ['word'],
-            'level'         => ['level']
-        ]);
+            'level'         => ['level'],
+            'status'        => ['status']
+        ];
 
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت فلشکارد
+        $flashcardId = (int)$request['id'];
+        $flashcard = $this->flashcardModel->findById($flashcardId);
+
+        if (!$flashcard || $flashcard['userId'] != $userId) {
+            throw new ApiException('Flashcard not found', 404);
         }
 
-        // Prepare data
+        // آماده‌سازی داده‌ها
         $data = [
             'categoryId'     => $request['categoryId'],
             'baseLang'       => strtolower($request['baseLang']),
@@ -175,88 +195,101 @@ class FlashcardController
             'status'         => $request['status'] ?? 'active'
         ];
 
-        // Update flashcard
-        $updateResult = $this->flashcardModel->updateFlashcard((int)$flashcardId, $data);
+        // به‌روزرسانی فلشکارد
+        $updateResult = $this->flashcardModel->updateFlashcard($flashcardId, $data);
         if ($updateResult) {
             return ['status' => 200, 'message' => 'Flashcard updated successfully'];
         }
 
-        return ['status' => 500, 'message' => 'Failed to update flashcard'];
+        throw new ApiException('Failed to update flashcard', 500);
     }
 
     /**
-     * Delete a flashcard
+     * حذف یک فلشکارد
+     *
+     * @param array $request
+     * @return array
+     * @throws ApiException
      */
     public function deleteFlashcard($request): array
     {
-        // Authenticate user
+        // احراز هویت کاربر
         $authResult = $this->authenticate($request);
         if ($authResult['status'] !== 200) {
             return $authResult;
         }
         $userId = $authResult['userId'];
 
-        // Validate ID
-        $flashcardId = $request['id'] ?? null;
-        if (!$flashcardId || !is_numeric($flashcardId)) {
-            return ['status' => 400, 'message' => 'Valid flashcard ID is required'];
-        }
+        // قوانین اعتبارسنجی
+        $rules = [
+            'id' => ['categoryId'] // می‌توانید یک ولیدیتور مخصوص برای ID تعریف کنید
+        ];
 
-        // Retrieve flashcard
-        $flashcard = $this->flashcardModel->findById((int)$flashcardId);
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت فلشکارد
+        $flashcardId = (int)$request['id'];
+        $flashcard = $this->flashcardModel->findById($flashcardId);
+
         if (!$flashcard || $flashcard['userId'] != $userId) {
-            return ['status' => 404, 'message' => 'Flashcard not found'];
+            throw new ApiException('Flashcard not found', 404);
         }
 
-        // Delete flashcard
-        $deleteResult = $this->flashcardModel->deleteFlashcard((int)$flashcardId);
+        // حذف فلشکارد
+        $deleteResult = $this->flashcardModel->deleteFlashcard($flashcardId);
         if ($deleteResult) {
             return ['status' => 200, 'message' => 'Flashcard deleted successfully'];
         }
 
-        return ['status' => 500, 'message' => 'Failed to delete flashcard'];
+        throw new ApiException('Failed to delete flashcard', 500);
     }
 
     /**
-     * Retrieve the count of flashcards for the authenticated user
+     * دریافت تعداد فلشکاردهای کاربر
+     *
+     * @param array $request
+     * @return array
+     * @throws ApiException
      */
     public function getFlashcardCount($request): array
     {
-        // Authenticate user
+        // احراز هویت کاربر
         $authResult = $this->authenticate($request);
         if ($authResult['status'] !== 200) {
             return $authResult;
         }
         $userId = $authResult['userId'];
 
-        // Retrieve flashcard count
+        // دریافت تعداد فلشکاردها
         $count = $this->flashcardModel->countFlashcardsByUser($userId);
         if ($count !== false) {
             return ['status' => 200, 'count' => $count];
         }
 
-        return ['status' => 500, 'message' => 'Failed to retrieve flashcard count'];
+        throw new ApiException('Failed to retrieve flashcard count', 500);
     }
 
     /**
-     * Authenticate the user using JWT
+     * احراز هویت کاربر با استفاده از JWT
      *
      * @param array $request
      * @return array
+     * @throws ApiException
      */
     private function authenticate($request): array
     {
-        // Retrieve token from headers
+        // دریافت توکن از هدرها
         $headers = getallheaders();
         if (!isset($headers['Authorization'])) {
-            return ['status' => 401, 'message' => 'Authorization token not provided'];
+            throw new ApiException('Authorization token not provided', 401);
         }
 
         $token = str_replace('Bearer ', '', $headers['Authorization']);
         $decodedToken = $this->jwtManager->verifyToken($token);
 
         if (!$decodedToken) {
-            return ['status' => 401, 'message' => 'Invalid or expired token'];
+            throw new ApiException('Invalid or expired token', 401);
         }
 
         return ['status' => 200, 'userId' => $decodedToken['userId']];

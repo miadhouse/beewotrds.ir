@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Services\RequestValidator;
 use App\Services\SessionManager;
 use App\Services\JWTManager;
+use App\Middleware\ValidationMiddleware;
+use App\Exceptions\ApiException;
 
 class CategoryController
 {
@@ -13,18 +15,21 @@ class CategoryController
     private RequestValidator $validator;
     private SessionManager $sessionManager;
     private JWTManager $jwtManager;
+    private ValidationMiddleware $validationMiddleware;
 
     public function __construct(
         Category         $categoryModel,
         RequestValidator $validator,
         SessionManager   $sessionManager,
-        JWTManager       $jwtManager
+        JWTManager       $jwtManager,
+        ValidationMiddleware $validationMiddleware
     )
     {
         $this->categoryModel = $categoryModel;
         $this->validator = $validator;
         $this->sessionManager = $sessionManager;
         $this->jwtManager = $jwtManager;
+        $this->validationMiddleware = $validationMiddleware;
     }
 
     /**
@@ -39,14 +44,15 @@ class CategoryController
         }
         $userId = $authResult['userId'];
 
-        // اعتبارسنجی ورودی‌ها
-        $this->validator->validateTitle($request['title'] ?? '');
-        $this->validator->validateDescription($request['description'] ?? '');
-        // اعتبارسنجی thumbnail در صورت نیاز
+        // قوانین اعتبارسنجی
+        $rules = [
+            'title' => ['title'],
+            'description' => ['description'],
+            'thumbnail' => ['thumbnail'] // در صورت نیاز
+        ];
 
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
-        }
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
 
         // آماده‌سازی داده‌ها
         $data = [
@@ -64,7 +70,7 @@ class CategoryController
             return ['status' => 201, 'message' => 'Category created successfully', 'categoryId' => $categoryId];
         }
 
-        return ['status' => 500, 'message' => 'Failed to create category'];
+        throw new ApiException('Failed to create category', 500);
     }
 
     /**
@@ -96,16 +102,19 @@ class CategoryController
         }
         $userId = $authResult['userId'];
 
-        // اعتبارسنجی ID
-        $categoryId = $request['id'] ?? null;
-        if (!$categoryId || !is_numeric($categoryId)) {
-            return ['status' => 400, 'message' => 'Valid category ID is required'];
-        }
+        // قوانین اعتبارسنجی
+        $rules = [
+            'id' => ['categoryId']
+        ];
+
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
 
         // دریافت دسته‌بندی
-        $category = $this->categoryModel->findById((int)$categoryId, $userId);
+        $categoryId = (int)$request['id'];
+        $category = $this->categoryModel->findById($categoryId, $userId);
         if (!$category) {
-            return ['status' => 404, 'message' => 'Category not found'];
+            throw new ApiException('Category not found', 404);
         }
 
         return ['status' => 200, 'data' => $category];
@@ -123,25 +132,24 @@ class CategoryController
         }
         $userId = $authResult['userId'];
 
-        // اعتبارسنجی ID
-        $categoryId = $request['id'] ?? null;
-        if (!$categoryId || !is_numeric($categoryId)) {
-            return ['status' => 400, 'message' => 'Valid category ID is required'];
-        }
+        // قوانین اعتبارسنجی
+        $rules = [
+            'id' => ['categoryId'],
+            'title' => ['title'],
+            'description' => ['description'],
+            'thumbnail' => ['thumbnail'] // در صورت نیاز
+        ];
+
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت ID
+        $categoryId = (int)$request['id'];
 
         // دریافت دسته‌بندی
-        $category = $this->categoryModel->findById((int)$categoryId, $userId);
+        $category = $this->categoryModel->findById($categoryId, $userId);
         if (!$category) {
-            return ['status' => 404, 'message' => 'Category not found'];
-        }
-
-        // اعتبارسنجی ورودی‌ها
-        $this->validator->validateTitle($request['title'] ?? '');
-        $this->validator->validateDescription($request['description'] ?? '');
-        // اعتبارسنجی thumbnail در صورت نیاز
-
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
+            throw new ApiException('Category not found', 404);
         }
 
         // آماده‌سازی داده‌ها
@@ -153,12 +161,12 @@ class CategoryController
         ];
 
         // به‌روزرسانی دسته‌بندی
-        $updateResult = $this->categoryModel->updateCategory((int)$categoryId, $userId, $data);
+        $updateResult = $this->categoryModel->updateCategory($categoryId, $userId, $data);
         if ($updateResult) {
             return ['status' => 200, 'message' => 'Category updated successfully'];
         }
 
-        return ['status' => 500, 'message' => 'Failed to update category'];
+        throw new ApiException('Failed to update category', 500);
     }
 
     /**
@@ -173,25 +181,30 @@ class CategoryController
         }
         $userId = $authResult['userId'];
 
-        // اعتبارسنجی ID
-        $categoryId = $request['id'] ?? null;
-        if (!$categoryId || !is_numeric($categoryId)) {
-            return ['status' => 400, 'message' => 'Valid category ID is required'];
-        }
+        // قوانین اعتبارسنجی
+        $rules = [
+            'id' => ['categoryId']
+        ];
+
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت ID
+        $categoryId = (int)$request['id'];
 
         // دریافت دسته‌بندی
-        $category = $this->categoryModel->findById((int)$categoryId, $userId);
+        $category = $this->categoryModel->findById($categoryId, $userId);
         if (!$category) {
-            return ['status' => 404, 'message' => 'Category not found'];
+            throw new ApiException('Category not found', 404);
         }
 
         // حذف دسته‌بندی
-        $deleteResult = $this->categoryModel->deleteCategory((int)$categoryId, $userId);
+        $deleteResult = $this->categoryModel->deleteCategory($categoryId, $userId);
         if ($deleteResult) {
             return ['status' => 200, 'message' => 'Category deleted successfully'];
         }
 
-        return ['status' => 500, 'message' => 'Failed to delete category'];
+        throw new ApiException('Failed to delete category', 500);
     }
 
     /**
@@ -212,7 +225,7 @@ class CategoryController
             return ['status' => 200, 'count' => $count];
         }
 
-        return ['status' => 500, 'message' => 'Failed to retrieve category count'];
+        throw new ApiException('Failed to retrieve category count', 500);
     }
 
     /**
@@ -223,14 +236,14 @@ class CategoryController
         // دریافت توکن از هدرها
         $headers = getallheaders();
         if (!isset($headers['Authorization'])) {
-            return ['status' => 401, 'message' => 'Authorization token not provided'];
+            throw new ApiException('Authorization token not provided', 401);
         }
 
         $token = str_replace('Bearer ', '', $headers['Authorization']);
         $decodedToken = $this->jwtManager->verifyToken($token);
 
         if (!$decodedToken) {
-            return ['status' => 401, 'message' => 'Invalid or expired token'];
+            throw new ApiException('Invalid or expired token', 401);
         }
 
         return ['status' => 200, 'userId' => $decodedToken['userId']];

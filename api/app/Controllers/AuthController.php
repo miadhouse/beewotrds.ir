@@ -1,8 +1,9 @@
 <?php
-// AuthController.php
+// src/Controllers/AuthController.php
 
 namespace App\Controllers;
 
+use App\Exceptions\ApiException;
 use App\Models\User;
 use App\Services\JWTManager;
 use App\Services\SessionManager;
@@ -10,6 +11,7 @@ use App\Services\RequestValidator;
 use App\Helpers\EmailService;
 use App\Helpers\TokenGenerator;
 use App\Services\ReCaptchaService;
+use App\Middleware\ValidationMiddleware;
 
 class AuthController
 {
@@ -20,6 +22,7 @@ class AuthController
     private EmailService $emailService;
     private TokenGenerator $tokenGenerator;
     private ReCaptchaService $reCaptcha;
+    private ValidationMiddleware $validationMiddleware;
 
     public function __construct(
         User             $userModel,
@@ -38,38 +41,38 @@ class AuthController
         $this->emailService = $emailService;
         $this->tokenGenerator = $tokenGenerator;
         $this->reCaptcha = $reCaptcha;
+        $this->validationMiddleware = new ValidationMiddleware($this->validator);
     }
 
     public function register($request): array
     {
+        // قوانین اعتبارسنجی
+        $rules = [
+            'email' => ['required', 'email'],
+            'password' => ['required', 'password'],
+            'userName' => ['required', 'username'],
+            'mobile' => ['required', 'mobile'],
+            'language' => ['language'],
+            // می‌توانید فیلدهای اضافی را اضافه کنید
+        ];
+
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
         // بررسی وجود توکن reCAPTCHA
         $recaptchaToken = $request['recaptchaToken'] ?? '';
         if (!$this->reCaptcha->verifyToken($recaptchaToken, $_SERVER['REMOTE_ADDR'] ?? '')) {
-            return ['status' => 400, 'message' => 'reCAPTCHA verification failed'];
-        }
-        // اعتبارسنجی ورودی‌ها
-        $this->validator->validateEmail($request['email']);
-        $this->validator->validatePassword($request['password']);
-        $this->validator->validateUsername($request['userName']);
-        $this->validator->validateMobile($request['mobile']);
-        $language = $request['language'] ?? 'en'; // مقدار پیش‌فرض زبان انگلیسی
-        $age = $request['age'] ?? null; // مقدار پیش‌فرض null
-        $imageProfile = $request['imageProfile'] ?? null; // مقدار پیش‌فرض null
-        // بررسی وجود خطاها
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
+            throw new ApiException('reCAPTCHA verification failed', 400);
         }
 
         // چک کردن ایمیل تکراری
-        $existingUserByEmail = $this->userModel->findByEmail($request['email']);
-        if ($existingUserByEmail) {
-            return ['status' => 409, 'message' => 'Email already exists'];
+        if ($this->userModel->findByEmail($request['email'])) {
+            throw new ApiException('Email already exists', 409);
         }
 
         // چک کردن موبایل تکراری
-        $existingUserByMobile = $this->userModel->findByMobile($request['mobile']);
-        if ($existingUserByMobile) {
-            return ['status' => 409, 'message' => 'Mobile number already exists'];
+        if ($this->userModel->findByMobile($request['mobile'])) {
+            throw new ApiException('Mobile number already exists', 409);
         }
 
         // رمزنگاری پسورد
@@ -79,30 +82,33 @@ class AuthController
         // تولید کد تأیید
         $verificationCode = $this->tokenGenerator->generateToken();
 
+        // ایجاد کاربر جدید
         $userId = $this->userModel->createUser([
             'userName' => $request['userName'],
             'role' => 'user',
             'email' => $request['email'],
             'mobile' => $request['mobile'],
-            'language' => $language,  // استفاده از مقدار پیش‌فرض در صورت عدم وجود
-            'age' => $age,  // استفاده از مقدار پیش‌فرض در صورت عدم وجود
-            'imageProfile' => $imageProfile,  // استفاده از مقدار پیش‌فرض در صورت عدم وجود
+            'language' => $request['language'] ?? 'en',
+            'age' => $request['age'] ?? null,
+            'imageProfile' => $request['imageProfile'] ?? null,
             'password' => $hashedPassword,
             'verificationCode' => $verificationCode,
             'verificationCodeExpiresAt' => $verificationCodeExpiresAt,
             'created_at' => date('Y-m-d H:i:s'),
-            'status' => 'pending' // وضعیت حساب در حالت "منتظر تأیید"
+            'status' => 'pending'
         ]);
 
+        // ایجاد لینک تأیید ایمیل
         $verificationLink = "http://localhost:3000/verify?code=$verificationCode";
-        $emailSubject = 'verify email';
+        $emailSubject = 'Verify your email';
         $emailBody = "
-        <p>Hi {$request['email']},</p>
-        <p>To verify your account, please click the link below:</p>
-        <p><a href='$verificationLink'>$verificationLink</a></p>
-        <p>Thanks,<br>Support team</p>
-    ";
+            <p>Hi {$request['userName']},</p>
+            <p>To verify your account, please click the link below:</p>
+            <p><a href='$verificationLink'>$verificationLink</a></p>
+            <p>Thanks,<br>Support team</p>
+        ";
 
+        // ارسال ایمیل تأیید
         $this->emailService->sendEmail($request['email'], $emailSubject, $emailBody);
 
         return ['status' => 201, 'message' => 'Registration successful. Please check your email to verify your account.'];
@@ -110,22 +116,27 @@ class AuthController
 
     public function verifyEmail($request): array
     {
-        $recaptchaToken = $request['recaptchaToken'] ?? '';
-        if (!$this->reCaptcha->verifyToken($recaptchaToken, $_SERVER['REMOTE_ADDR'] ?? '')) {
-            return ['status' => 400, 'message' => 'reCAPTCHA verification failed'];
-        }
-        // دریافت کد تأیید از درخواست
-        $verificationCode = $request['code'] ?? null;
+        // قوانین اعتبارسنجی
+        $rules = [
+            'code' => ['required']
+        ];
 
-        if (!$verificationCode) {
-            return ['status' => 400, 'message' => 'Verification code is required'];
-        }
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت کد تأیید
+        $verificationCode = $request['code'];
 
         // پیدا کردن کاربر با کد تأیید و بررسی انقضا
         $user = $this->userModel->findByVerificationCode($verificationCode);
 
         if (!$user) {
-            return ['status' => 400, 'message' => 'Invalid or expired verification code'];
+            throw new ApiException('Invalid or expired verification code', 400);
+        }
+
+        // بررسی انقضای کد تأیید
+        if (new \DateTime() > new \DateTime($user['verificationCodeExpiresAt'])) {
+            throw new ApiException('Verification code has expired', 400);
         }
 
         // به‌روزرسانی وضعیت کاربر به "active"
@@ -139,26 +150,26 @@ class AuthController
 
     public function resendVerificationEmail($request): array
     {
-        $recaptchaToken = $request['recaptchaToken'] ?? '';
-        if (!$this->reCaptcha->verifyToken($recaptchaToken, $_SERVER['REMOTE_ADDR'] ?? '')) {
-            return ['status' => 400, 'message' => 'reCAPTCHA verification failed'];
-        }
-        // دریافت ایمیل کاربر
-        $email = $request['email'] ?? null;
+        // قوانین اعتبارسنجی
+        $rules = [
+            'email' => ['required', 'email']
+        ];
 
-        if (!$email) {
-            return ['status' => 400, 'message' => 'Email is required'];
-        }
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت ایمیل کاربر
+        $email = $request['email'];
 
         // پیدا کردن کاربر با ایمیل
         $user = $this->userModel->findByEmail($email);
 
         if (!$user) {
-            return ['status' => 404, 'message' => 'User not found'];
+            throw new ApiException('User not found', 404);
         }
 
         if ($user['status'] === 'active') {
-            return ['status' => 400, 'message' => 'Account is already verified'];
+            throw new ApiException('Account is already verified', 400);
         }
 
         // تولید کد تأیید جدید
@@ -168,16 +179,17 @@ class AuthController
         // به‌روزرسانی کد تأیید و زمان انقضا
         $this->userModel->updateVerificationCode($user['id'], $verificationCode, $verificationCodeExpiresAt);
 
-        // ارسال ایمیل تأیید
+        // ایجاد لینک تأیید ایمیل جدید
         $verificationLink = "http://localhost:3000/verify?code=$verificationCode";
-        $emailSubject = 'Re-verify email';
+        $emailSubject = 'Re-verify your email';
         $emailBody = "
-        <p>Hi {$user['userName']},</p>
-        <p>To verify your account, please click the link below:</p>
-        <p><a href='$verificationLink'>$verificationLink</a></p>
-        <p>Thanks,<br>Support team</p>
-    ";
+            <p>Hi {$user['userName']},</p>
+            <p>To verify your account, please click the link below:</p>
+            <p><a href='$verificationLink'>$verificationLink</a></p>
+            <p>Thanks,<br>Support team</p>
+        ";
 
+        // ارسال ایمیل تأیید
         $this->emailService->sendEmail($email, $emailSubject, $emailBody);
 
         return ['status' => 200, 'message' => 'A new verification email has been sent'];
@@ -185,41 +197,34 @@ class AuthController
 
     public function login($request): array
     {
-        error_log("Login method called.");
+        // قوانین اعتبارسنجی
+        $rules = [
+            'email' => ['required', 'email'],
+            'password' => ['required', 'password']
+        ];
 
-        $recaptchaToken = $request['recaptchaToken'] ?? '';
-        error_log("Received recaptchaToken: " . substr($recaptchaToken, 0, 10) . "...");
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
 
-        if (!$this->reCaptcha->verifyToken($recaptchaToken, $_SERVER['REMOTE_ADDR'] ?? '')) {
-            error_log("reCAPTCHA verification failed.");
-            return ['status' => 400, 'message' => 'reCAPTCHA verification failed'];
-        }
-        error_log("reCAPTCHA verification passed.");
-        // اعتبارسنجی ایمیل و پسورد
-        $this->validator->validateEmail($request['email']);
-        $this->validator->validatePassword($request['password']);
-
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
-        }
-
+        // دریافت کاربر بر اساس ایمیل
         $user = $this->userModel->findByEmail($request['email']);
 
         if (!$user) {
-            // برای امنیت بیشتر، پیام مشابهی به کاربر نمایش می‌دهیم
-            return ['status' => 401, 'message' => 'Invalid email or password'];
+            // برای امنیت بیشتر، پیام مشابهی به کاربر نمایش داده می‌شود
+            throw new ApiException('Invalid email or password', 401);
         }
 
         // بررسی قفل بودن حساب کاربر
         if ($user['lockedUntil'] && new \DateTime() < new \DateTime($user['lockedUntil'])) {
-            return [
-                'status' => 403,
-                'message' => 'Your account is locked due to multiple failed login attempts. Please try again later.'
-            ];
+            throw new ApiException(
+                'Your account is locked due to multiple failed login attempts. Please try again later.',
+                403
+            );
         }
 
+        // بررسی صحت پسورد
         if (!password_verify($request['password'], $user['password'])) {
-            // رمز عبور نامعتبر است، افزایش تعداد تلاش‌های ناموفق
+            // افزایش تعداد تلاش‌های ناموفق
             $failedAttempts = $user['failedLoginAttempts'] + 1;
             $currentTime = date('Y-m-d H:i:s');
 
@@ -232,13 +237,13 @@ class AuthController
             if ($failedAttempts >= $maxFailedAttempts) {
                 $lockedUntil = date('Y-m-d H:i:s', strtotime($lockDuration));
                 $this->userModel->lockUser($user['id'], $lockedUntil);
-                return [
-                    'status' => 403,
-                    'message' => 'Your account has been locked due to multiple failed login attempts. Please try again later.'
-                ];
+                throw new ApiException(
+                    'Your account has been locked due to multiple failed login attempts. Please try again later.',
+                    403
+                );
             }
 
-            return ['status' => 401, 'message' => 'Invalid email or password'];
+            throw new ApiException('Invalid email or password', 401);
         }
 
         // رمز عبور صحیح است، بازنشانی تعداد تلاش‌های ناموفق
@@ -246,18 +251,17 @@ class AuthController
 
         // بررسی وضعیت حساب کاربر
         if ($user['status'] !== 'active') {
-            return ['status' => 403, 'message' => 'Account is not verified. Please verify your email before logging in.'];
+            throw new ApiException('Account is not verified. Please verify your email before logging in.', 403);
         }
-        if ($user['status'] === 'pending') {
-            return ['status' => 403, 'message' => 'Account is not verified. Please verify your email before logging in.'];
-        }
+
         if ($user['status'] === 'suspended') {
-            return ['status' => 403, 'message' => 'Your account has been suspended. Please contact support.'];
+            throw new ApiException('Your account has been suspended. Please contact support.', 403);
         }
 
         // تولید توکن JWT
         $token = $this->jwtManager->createToken($user['id'], $user['role']);
 
+        // ذخیره اطلاعات کاربر در سشن
         $this->sessionManager->set('user', [
             'id' => $user['id'],
             'email' => $user['email'],
@@ -267,6 +271,7 @@ class AuthController
 
         return ['status' => 200, 'message' => 'Login successful', 'token' => $token];
     }
+
     public function logout(): array
     {
         // حذف تمام سشن‌ها
@@ -279,14 +284,14 @@ class AuthController
         // دریافت توکن از هدر Authorization
         $headers = getallheaders();
         if (!isset($headers['Authorization'])) {
-            return ['status' => 401, 'message' => 'Authorization token not provided'];
+            throw new ApiException('Authorization token not provided', 401);
         }
 
         $token = str_replace('Bearer ', '', $headers['Authorization']);
         $decodedToken = $this->jwtManager->verifyToken($token);
 
         if (!$decodedToken) {
-            return ['status' => 401, 'message' => 'Invalid or expired token'];
+            throw new ApiException('Invalid or expired token', 401);
         }
 
         // بازیابی اطلاعات کاربر با استفاده از id موجود در توکن
@@ -294,25 +299,27 @@ class AuthController
         if ($user) {
             return ['status' => 200, 'data' => $user];
         } else {
-            return ['status' => 404, 'message' => 'User not found'];
+            throw new ApiException('User not found', 404);
         }
     }
+
     public function recoverPassword($request): array
     {
-        $recaptchaToken = $request['recaptchaToken'] ?? '';
-        if (!$this->reCaptcha->verifyToken($recaptchaToken, $_SERVER['REMOTE_ADDR'] ?? '')) {
-            return ['status' => 400, 'message' => 'reCAPTCHA verification failed'];
-        }
-        // اعتبارسنجی ایمیل
-        $this->validator->validateEmail($request['email'] ?? '');
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
-        }
+        // قوانین اعتبارسنجی
+        $rules = [
+            'email' => ['required', 'email']
+        ];
+
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
+
+        // دریافت ایمیل کاربر
+        $email = $request['email'];
 
         // پیدا کردن کاربر با ایمیل
-        $user = $this->userModel->findByEmail($request['email']);
+        $user = $this->userModel->findByEmail($email);
         if (!$user) {
-            // برای امنیت بیشتر، پیام مشابهی به کاربر نمایش می‌دهیم
+            // برای امنیت بیشتر، پیام مشابهی به کاربر نمایش داده می‌شود
             return ['status' => 200, 'message' => 'If the email exists, a password reset link has been sent.'];
         }
 
@@ -329,10 +336,10 @@ class AuthController
             $interval = $lastRequestTime->diff($currentTime);
             if ($interval < $timeWindow) {
                 if ($requestCount >= $maxRequests) {
-                    return [
-                        'status' => 429,
-                        'message' => 'You have exceeded the maximum number of password reset requests. Please try again later.'
-                    ];
+                    throw new ApiException(
+                        'You have exceeded the maximum number of password reset requests. Please try again later.',
+                        429
+                    );
                 } else {
                     // افزایش تعداد درخواست‌ها
                     $requestCount += 1;
@@ -362,50 +369,43 @@ class AuthController
         // ارسال ایمیل به کاربر
         $emailSubject = 'Password Reset Request';
         $emailBody = "
-        <p>Hi {$user['userName']},</p>
-        <p>You requested to reset your password. Please click the link below to reset your password:</p>
-        <p><a href='$resetLink'>$resetLink</a></p>
-        <p>This link will expire in 1 hour.</p>
-        <p>Thanks,<br>Support team</p>
-    ";
+            <p>Hi {$user['userName']},</p>
+            <p>You requested to reset your password. Please click the link below to reset your password:</p>
+            <p><a href='$resetLink'>$resetLink</a></p>
+            <p>This link will expire in 1 hour.</p>
+            <p>Thanks,<br>Support team</p>
+        ";
 
         $this->emailService->sendEmail($user['email'], $emailSubject, $emailBody);
 
         return ['status' => 200, 'message' => 'If the email exists, a password reset link has been sent.'];
     }
-    /**
-     * تنظیم رمز عبور جدید
-     */
+
     public function resetPassword($request): array
     {
-        $recaptchaToken = $request['recaptchaToken'] ?? '';
-        if (!$this->reCaptcha->verifyToken($recaptchaToken, $_SERVER['REMOTE_ADDR'] ?? '')) {
-            return ['status' => 400, 'message' => 'reCAPTCHA verification failed'];
-        }
-        // دریافت توکن و رمز عبور جدید از درخواست
-        $resetToken = $request['token'] ?? null;
-        $newPassword = $request['password'] ?? null;
+        // قوانین اعتبارسنجی
+        $rules = [
+            'token' => ['required'],
+            'password' => ['required', 'password']
+        ];
 
-        if (!$resetToken || !$newPassword) {
-            return ['status' => 400, 'message' => 'Token and new password are required'];
-        }
+        // انجام اعتبارسنجی با Middleware
+        $this->validationMiddleware->handle($request, $rules);
 
-        // اعتبارسنجی رمز عبور
-        $this->validator->validatePassword($newPassword);
-        if ($this->validator->hasErrors()) {
-            return ['status' => 400, 'errors' => $this->validator->getErrors()];
-        }
+        // دریافت توکن و رمز عبور جدید
+        $resetToken = $request['token'];
+        $newPassword = $request['password'];
 
         // پیدا کردن کاربر با توکن بازیابی و بررسی انقضا
         $user = $this->userModel->findByPasswordResetToken($resetToken);
         if (!$user) {
-            return ['status' => 400, 'message' => 'Invalid or expired reset token'];
+            throw new ApiException('Invalid or expired reset token', 400);
         }
 
         // بررسی انقضا
         $currentDateTime = date('Y-m-d H:i:s');
         if ($currentDateTime > $user['passwordResetExpiresAt']) {
-            return ['status' => 400, 'message' => 'Reset token has expired'];
+            throw new ApiException('Reset token has expired', 400);
         }
 
         // رمزنگاری رمز عبور جدید

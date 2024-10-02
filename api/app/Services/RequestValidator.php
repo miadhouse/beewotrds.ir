@@ -6,74 +6,88 @@ class RequestValidator
 {
     private array $errors = [];
 
-    // Existing validation methods...
+    // متدهای اعتبارسنجی...
 
-    // متد برای اعتبارسنجی ایمیل
     public function validateEmail(string $email): void
     {
+        $email = trim($email);
+        if (empty($email)) {
+            $this->errors['email'] = 'Email is required.';
+            return;
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->errors['email'] = 'Invalid email format.';
+            return;
+        }
+
+        // بررسی وجود رکوردهای MX برای دامنه ایمیل
+        $domain = substr(strrchr($email, "@"), 1);
+        if (!checkdnsrr($domain, 'MX')) {
+            $this->errors['email'] = 'Email domain does not have valid MX records.';
         }
     }
 
-    // متد برای اعتبارسنجی رمز عبور
     public function validatePassword(string $password): void
     {
+        $password = trim($password);
+        if (empty($password)) {
+            $this->errors['password'] = 'Password is required.';
+            return;
+        }
+
         if (strlen($password) < 6) {
             $this->errors['password'] = 'Password must be at least 6 characters long.';
         }
     }
 
-    // متد برای اعتبارسنجی شماره موبایل
     public function validateMobile(string $mobile): void
     {
+        $mobile = trim($mobile);
+        if (empty($mobile)) {
+            $this->errors['mobile'] = 'Mobile number is required.';
+            return;
+        }
+
         if (strlen($mobile) < 11 || !preg_match('/^[0-9]+$/', $mobile)) {
             $this->errors['mobile'] = 'Mobile number must be at least 11 digits long and contain only numbers.';
         }
     }
 
-    // متد برای اعتبارسنجی نام کاربری (فقط حروف و اعداد)
     public function validateUsername(string $username): void
     {
+        $username = trim($username);
+        if (empty($username)) {
+            $this->errors['username'] = 'Username is required.';
+            return;
+        }
+
         if (!preg_match('/^[a-zA-Z0-9]+$/', $username)) {
             $this->errors['username'] = 'Username must contain only letters and numbers.';
         }
     }
 
-    /**
-     * اعتبارسنجی عنوان
-     *
-     * @param string $title
-     * @return void
-     */
     public function validateTitle(string $title): void
     {
-        // بررسی خالی نبودن عنوان
+        $title = trim($title);
         if (empty($title)) {
             $this->errors['title'] = 'Title is required.';
+            return;
         }
 
-        // بررسی طول عنوان (باید حداقل 3 و حداکثر 255 کاراکتر باشد)
         if (strlen($title) < 3 || strlen($title) > 255) {
             $this->errors['title'] = 'Title must be between 3 and 255 characters.';
+            return;
         }
 
-        // بررسی وجود کاراکترهای غیرمجاز
         if (!preg_match('/^[a-zA-Z0-9\s]+$/', $title)) {
             $this->errors['title'] = 'Title can only contain letters, numbers, and spaces.';
         }
     }
 
-
-
-    /**
-     * Validate description
-     *
-     * @param string $description
-     * @return void
-     */
     public function validateDescription(string $description): void
     {
+        $description = trim($description);
         if (empty($description)) {
             $this->errors['description'] = 'Description is required.';
             return;
@@ -84,19 +98,13 @@ class RequestValidator
         }
     }
 
-    // Thumbnail validation can be added if needed
     public function validateThumbnail(?string $thumbnail): void
     {
         if ($thumbnail && !filter_var($thumbnail, FILTER_VALIDATE_URL)) {
             $this->errors['thumbnail'] = 'Thumbnail must be a valid URL.';
         }
     }
-    /**
-     * اعتبارسنجی شناسه دسته‌بندی
-     *
-     * @param mixed $categoryId
-     * @return void
-     */
+
     public function validateCategoryId($categoryId): void
     {
         if (empty($categoryId) || !is_numeric($categoryId) || (int)$categoryId <= 0) {
@@ -105,13 +113,6 @@ class RequestValidator
         // Optionally, you can add a check to ensure the category exists in the database
     }
 
-    /**
-     * اعتبارسنجی زبان پایه و ترجمه
-     *
-     * @param string|null $language
-     * @param string $fieldName
-     * @return void
-     */
     public function validateLanguage(?string $language, string $fieldName = 'Language'): void
     {
         $allowedLanguages = ['en', 'es', 'fr', 'de', 'it', 'fa', 'ar', 'zh', 'jp']; // Extend as needed
@@ -121,13 +122,6 @@ class RequestValidator
         }
     }
 
-    /**
-     * اعتبارسنجی کلمه (Front Word و Back Word)
-     *
-     * @param string|null $word
-     * @param string $fieldName
-     * @return void
-     */
     public function validateWord(?string $word, string $fieldName = 'Word'): void
     {
         if (empty($word)) {
@@ -135,23 +129,15 @@ class RequestValidator
             return;
         }
 
-        // بررسی اینکه کلمه فقط حروف، اعداد و فضای خالی باشد
         if (!preg_match('/^[\p{L}\p{N}\s]+$/u', $word)) { // \p{L} for any kind of letter from any language
             $this->errors[$fieldName] = "$fieldName can only contain letters, numbers, and spaces.";
         }
 
-        // بررسی طول کلمه (باید حداقل 1 و حداکثر 255 کاراکتر باشد)
         if (strlen($word) < 1 || strlen($word) > 255) {
             $this->errors[$fieldName] = "$fieldName must be between 1 and 255 characters.";
         }
     }
 
-    /**
-     * اعتبارسنجی سطح (Level)
-     *
-     * @param mixed $level
-     * @return void
-     */
     public function validateLevel($level): void
     {
         $allowedLevels = ['beginner', 'intermediate', 'advanced'];
@@ -161,12 +147,6 @@ class RequestValidator
         }
     }
 
-    /**
-     * اعتبارسنجی وضعیت (Status)
-     *
-     * @param mixed $status
-     * @return void
-     */
     public function validateStatus($status): void
     {
         $allowedStatuses = ['active', 'inactive', 'pending', 'suspended'];
@@ -176,19 +156,31 @@ class RequestValidator
         }
     }
 
-    // بررسی اینکه آیا خطایی وجود دارد یا خیر
+    /**
+     * بررسی اینکه آیا خطایی وجود دارد یا خیر
+     *
+     * @return bool
+     */
     public function hasErrors(): bool
     {
         return !empty($this->errors);
     }
 
-    // دریافت تمام خطاها
+    /**
+     * دریافت تمام خطاها
+     *
+     * @return array
+     */
     public function getErrors(): array
     {
         return $this->errors;
     }
 
-    // متد برای پاک کردن خطاها
+    /**
+     * پاک کردن خطاها
+     *
+     * @return void
+     */
     public function clearErrors(): void
     {
         $this->errors = [];
@@ -197,7 +189,8 @@ class RequestValidator
     /**
      * متد کلی برای اعتبارسنجی مجموعه‌ای از فیلدها با قوانین متنوع
      *
-     * @param array $fields
+     * @param array $data
+     * @param array $rules
      * @return void
      */
     public function validate(array $data, array $rules): void
@@ -224,4 +217,5 @@ class RequestValidator
                 }
             }
         }
-    }}
+    }
+}
