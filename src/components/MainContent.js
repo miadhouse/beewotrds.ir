@@ -124,14 +124,15 @@ const MainContent = () => {
 
 
                 {/* Offcanvas برای ساخت فلش‌کارت جدید */}
-                <Offcanvas show={showOffcanvas} onHide={handleClose} placement="bottom">
+                <Offcanvas show={showOffcanvas} onHide={handleClose} placement="bottom" container={document.querySelector('.App')}>
                     <Offcanvas.Header closeButton>
-                        <Offcanvas.Title> {t('Create a new flashcard')}</Offcanvas.Title>
+                        <Offcanvas.Title>{t('Create a new flashcard')}</Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body>
                         <FlashcardForm onClose={handleClose} />
                     </Offcanvas.Body>
                 </Offcanvas>
+
             </div>
         </div>
     );

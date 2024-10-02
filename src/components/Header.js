@@ -7,7 +7,6 @@ import Form from 'react-bootstrap/Form';
 import FlagIcon from './FlagIcon'; // کامپوننت FlagIcon خود را ایمپورت کنید
 import { FaGlobe } from 'react-icons/fa'; // آیکون کره زمین
 import 'bootstrap/dist/css/bootstrap.min.css';
-import styles from '../assets/Header.module.css'; // ایمپورت CSS Module
 
 const Header = () => {
     const { i18n } = useTranslation();
