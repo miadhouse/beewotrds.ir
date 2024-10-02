@@ -668,11 +668,26 @@ body[dir='rtl'] .container {
     padding-left: 0;
     padding-right: 15px;
 }
-
 .App[dir='rtl'] .ui-switch {
     margin-left: 0 !important;
     margin-right: 1rem !important;
+}.App[dir='rtl'] .offcanvas-end {
+     border-radius: 20px 0 0 20px !important;
 }
 .header {
     padding-top: 21px;
 }
+#dropdown-flags{
+    background-color: rgba(255, 255, 255, 0);
+    padding: 0;
+    border: none;
+}
+.App[dir='rtl'] .dropdown-item {
+     text-align: right;
+ }
+.App[dir='rtl'] .dropdown-menu {
+    transform: translate3d(-120px, 20px, 0px) !important;
+ }
+ .language-selector{
+     margin:0 1rem;
+ }

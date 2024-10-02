@@ -1,19 +1,61 @@
 // src/components/Header.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from "./Sidebar";
-import ReactFlagsSelect from 'react-flags-select';
 import { useTranslation } from 'react-i18next';
-import styles from '../assets/Header.module.css'; // Import the CSS Module
+import Dropdown from 'react-bootstrap/Dropdown';
+import Form from 'react-bootstrap/Form';
+import FlagIcon from './FlagIcon'; // کامپوننت FlagIcon خود را ایمپورت کنید
+import { FaGlobe } from 'react-icons/fa'; // آیکون کره زمین
+import 'bootstrap/dist/css/bootstrap.min.css';
+import styles from '../assets/Header.module.css'; // ایمپورت CSS Module
 
 const Header = () => {
     const { i18n } = useTranslation();
-    const [selected, setSelected] = useState('US'); // Default selected country code
+    const [selectedCountry, setSelectedCountry] = useState(null);
+    const [toggleContents, setToggleContents] = useState(<FaGlobe size={20} />); // آیکون پیش‌فرض کره زمین
 
+    const countries = [
+        { code: 'us', title: 'English' },
+        { code: 'ir', title: 'فارسی' },
+        { code: 'as', title: 'Other' } // سایر زبان‌ها در صورت نیاز
+    ];
+
+    // تابع برای تغییر زبان
     const handleSelect = (countryCode) => {
-        setSelected(countryCode);
-        const languageCode = countryCode === 'US' ? 'en' : 'fa';
+        const { code } = countries.find(country => country.code === countryCode);
+        setSelectedCountry(code);
+        setToggleContents(
+            <>
+                <FlagIcon code={code} /> {/* نمایش فقط پرچم بعد از انتخاب */}
+            </>
+        );
+        const languageCode = code === 'us' ? 'en' : 'fa';
         i18n.changeLanguage(languageCode);
+
+        // ذخیره زبان انتخاب‌شده در localStorage
+        localStorage.setItem('selectedLanguage', code);
     };
+
+    // استفاده از useEffect برای تنظیم زبان اولیه از localStorage
+    useEffect(() => {
+        const savedLanguage = localStorage.getItem('selectedLanguage');
+
+        if (savedLanguage) {
+            // اگر زبانی ذخیره شده باشد، آن را به عنوان زبان انتخاب‌شده تنظیم کنید
+            setSelectedCountry(savedLanguage);
+            setToggleContents(
+                <>
+                    <FlagIcon code={savedLanguage} />
+                </>
+            );
+
+            const languageCode = savedLanguage === 'us' ? 'en' : 'fa';
+            i18n.changeLanguage(languageCode);
+        } else {
+            // اگر زبانی ذخیره نشده باشد، می‌توانید زبان پیش‌فرض را تنظیم کنید
+            setToggleContents(<FaGlobe size={20} />);
+        }
+    }, [i18n]);
 
     return (
         <div className="header position-absolute z-2 d-flex align-items-center">
@@ -31,25 +73,32 @@ const Header = () => {
                 </div>
             </label>
 
-            {/* Language Selector */}
+            {/* انتخاب زبان با استفاده از Dropdown بوت‌استرپ */}
             <div className="language-selector ms-3">
-                <ReactFlagsSelect
-                    selected={selected}
-                    onSelect={handleSelect}
-                    countries={["US", "IR", "AS"]}
-                    customLabels={{ "US": "", "IR": "" }} // Empty labels
-                    placeholder="" // Remove placeholder text
-                    showSelectedLabel={false} // Hide selected label
-                    showOptionLabel={false} // Hide option labels in dropdown
-                    selectedSize={24} // Adjust size as needed
-                    optionsSize={24} // Adjust size as needed
-                    alignOptionsToRight
-                    className="custom-react-flags-select"
-                    dropdownClassName="custom-react-flags-dropdown"
-                />
+                <Form>
+                    <Dropdown onSelect={handleSelect}>
+                        <Dropdown.Toggle
+                            variant="primary"
+                            id="dropdown-flags"
+                            className="text-left d-flex align-items-center"
+                            style={{ width: 50 }} // کاهش عرض برای نمایش فقط پرچم یا آیکون
+                        >
+                            {toggleContents}
+                        </Dropdown.Toggle>
+
+                        <Dropdown.Menu>
+                            {countries.map(({ code, title }) => (
+                                <Dropdown.Item key={code} eventKey={code}>
+                                    <FlagIcon code={code} /> {title} {/* نمایش پرچم و نام زبان در منو */}
+                                </Dropdown.Item>
+                            ))}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </Form>
             </div>
 
-            <div className="offcanvas offcanvas-start" tabIndex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+            {/* اعمال کلاس شرطی بر اساس زبان انتخاب‌شده */}
+            <div className={`offcanvas ${selectedCountry === 'ir' ? 'offcanvas-end' : 'offcanvas-start'}`} tabIndex="-1" id="sidebar" aria-labelledby="sidebarLabel">
                 <Sidebar />
             </div>
         </div>
