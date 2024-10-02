@@ -3,8 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
+import { useTranslation } from 'react-i18next';
 
 const FlashcardForm = ({ onClose }) => {
+    const { t, i18n } = useTranslation();
+
     const [formData, setFormData] = useState({
         categoryId: '',
         baseLang: '',
@@ -98,23 +101,29 @@ const FlashcardForm = ({ onClose }) => {
 
     return (
         <form onSubmit={handleSubmit}>
-            {errors.general && <div className="alert alert-danger">{errors.general}</div>}
+            {errors.general && (
+                <div className="alert alert-danger">{t(errors.general)}</div>
+            )}
 
             <div className="mb-3">
-                <label htmlFor="categoryId" className="form-label">Category</label>
+                <label htmlFor="categoryId" className="form-label">
+                    {t('Category')}
+                </label>
                 <Select
                     id="categoryId"
                     name="categoryId"
                     options={categories}
                     onChange={handleCategoryChange}
-                    placeholder="Select a category..."
+                    placeholder={t('Select a category...')}
                     isClearable
                 />
             </div>
 
             {/* Other form fields */}
             <div className="mb-3">
-                <label htmlFor="baseLang" className="form-label">Base Language</label>
+                <label htmlFor="baseLang" className="form-label">
+                    {t('Base Language')}
+                </label>
                 <input
                     type="text"
                     className="form-control"
@@ -126,7 +135,9 @@ const FlashcardForm = ({ onClose }) => {
                 />
             </div>
             <div className="mb-3">
-                <label htmlFor="translateLang" className="form-label">Translation Language</label>
+                <label htmlFor="translateLang" className="form-label">
+                    {t('Translation Language')}
+                </label>
                 <input
                     type="text"
                     className="form-control"
@@ -138,7 +149,9 @@ const FlashcardForm = ({ onClose }) => {
                 />
             </div>
             <div className="mb-3">
-                <label htmlFor="frontWord" className="form-label">Front Word</label>
+                <label htmlFor="frontWord" className="form-label">
+                    {t('Front Word')}
+                </label>
                 <input
                     type="text"
                     className="form-control"
@@ -150,7 +163,9 @@ const FlashcardForm = ({ onClose }) => {
                 />
             </div>
             <div className="mb-3">
-                <label htmlFor="backWord" className="form-label">Back Word</label>
+                <label htmlFor="backWord" className="form-label">
+                    {t('Back Word')}
+                </label>
                 <input
                     type="text"
                     className="form-control"
@@ -162,7 +177,9 @@ const FlashcardForm = ({ onClose }) => {
                 />
             </div>
             <div className="mb-3">
-                <label htmlFor="level" className="form-label">Level</label>
+                <label htmlFor="level" className="form-label">
+                    {t('Level')}
+                </label>
                 <input
                     type="text"
                     className="form-control"
@@ -175,7 +192,7 @@ const FlashcardForm = ({ onClose }) => {
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Flashcard'}
+                {loading ? t('Creating...') : t('Create Flashcard')}
             </button>
         </form>
     );

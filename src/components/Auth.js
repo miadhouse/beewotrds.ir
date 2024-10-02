@@ -11,8 +11,8 @@ import splashAnimation from '../assets/splash.json';
 import { useTranslation } from 'react-i18next';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';
-import FlagIcon from './FlagIcon'; // ایمپورت FlagIcon برای نمایش پرچم‌ها
-import { FaGlobe } from 'react-icons/fa'; // آیکون کره زمین
+import FlagIcon from './FlagIcon';
+import { FaGlobe } from 'react-icons/fa';
 
 const Auth = () => {
     const [key, setKey] = useState('login');
@@ -26,7 +26,6 @@ const Auth = () => {
     const countries = [
         { code: 'us', title: 'English' },
         { code: 'ir', title: 'فارسی' },
-        { code: 'as', title: 'Other' } // سایر زبان‌ها
     ];
 
     // تابع برای تغییر زبان

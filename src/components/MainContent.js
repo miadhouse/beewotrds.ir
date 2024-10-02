@@ -8,8 +8,10 @@ import useCategoryCount from '../hooks/useCategoryCount'; // Import the hook
 import styles from  '../assets/landing.module.css'; // Import the hook
 import FlashcardForm from './FlashcardForm'; // ایمپورت کامپوننت فرم
 import { Offcanvas } from 'react-bootstrap'; // ایمپورت کامپوننت‌های مورد نیاز
+import { useTranslation } from 'react-i18next';
 
 const dataSet = {
+
     Today: [
         { name: '00:00', view: 10 },
         { name: '01:00', view: 40 },
@@ -56,6 +58,8 @@ const dataSet2 = {
 };
 
 const MainContent = () => {
+    const { t, i18n } = useTranslation();
+
     const { count: flashcardCount, loading: flashcardLoading } = useFlashcardCount();
     const { count: categoryCount, loading: categoryLoading } = useCategoryCount();
 
@@ -79,7 +83,8 @@ const MainContent = () => {
                     ) : (
                         <h3 className="mb-0">{flashcardCount}</h3>
                     )}
-                    <small>Flash Cards</small>
+                    <small>{t('Flash Card')}</small>
+
                 </div>
                 <div className={`widget widget-left text-center`}>
                     {categoryLoading ? (
@@ -87,14 +92,15 @@ const MainContent = () => {
                     ) : (
                         <h3 className="mb-0">{categoryCount}</h3>
                     )}
-                    <small>Categories</small>
+                    <small>{t('Category')}</small>
+
                 </div>
 
                 <div className={`widget widget-left-bottom text-center`}>
-                    <ChartComponent id="myChart" title="Last 3 Days" dataSetKey="Today" dataSet={dataSet}/>
+                    <ChartComponent id="myChart" title= {t('Last 3 Day')} dataSetKey="Today" dataSet={dataSet}/>
                 </div>
                 <div className={`widget widget-right-bottom text-center`}>
-                    <ChartComponent id="myChart2" title="Last Month" dataSetKey="Today" dataSet={dataSet2}/>
+                    <ChartComponent id="myChart2" title={t('Last Month')} dataSetKey="Today" dataSet={dataSet2}/>
                 </div>
                 <SvgGraphic/>
                 <div className={styles['button-group']}>
@@ -103,43 +109,24 @@ const MainContent = () => {
                             <button className={styles.pushable} onClick={handleNewCardClick}>
                                 <span className={styles.shadow}></span>
                                 <span className={styles.edge}></span>
-                                <span className={styles.front}> New Card </span>
+                                <span className={styles.front}> {t('New Card')} </span>
                             </button>
                         </div>
                         <div className="col-6">
                             <button className={styles.pushable}>
                                 <span className={styles.shadow}></span>
                                 <span className={styles.edge}></span>
-                                <span className={styles.front}> Push Me </span>
+                                <span className={styles.front}> {t('All Category')} </span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Offcanvas برای ساخت فلش‌کارت جدید */}
-                <div className={styles['button-group']}>
-                    <div className="row text-center">
-                        <div className="col-6">
-                            <button className={styles.pushable} onClick={handleNewCardClick}>
-                                <span className={styles.shadow}></span>
-                                <span className={styles.edge}></span>
-                                <span className={styles.front}> New Card </span>
-                            </button>
-                        </div>
-                        <div className="col-6">
-                            <button className={styles.pushable}>
-                                <span className={styles.shadow}></span>
-                                <span className={styles.edge}></span>
-                                <span className={styles.front}> Push Me </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 {/* Offcanvas برای ساخت فلش‌کارت جدید */}
                 <Offcanvas show={showOffcanvas} onHide={handleClose} placement="bottom">
                     <Offcanvas.Header closeButton>
-                        <Offcanvas.Title>ساخت فلش‌کارت جدید</Offcanvas.Title>
+                        <Offcanvas.Title> {t('Create a new flashcard')}</Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body>
                         <FlashcardForm onClose={handleClose} />

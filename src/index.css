@@ -637,8 +637,6 @@ body[dir='rtl'] .container {
     margin-left: auto;
     margin-right: auto;
 }
-
-
 .App[dir='rtl'] .header-right {
     left: 0;
     right: auto;
@@ -685,9 +683,7 @@ body[dir='rtl'] .container {
 .App[dir='rtl'] .dropdown-item {
      text-align: right;
  }
-.App[dir='rtl'] .dropdown-menu {
-    transform: translate3d(-120px, 20px, 0px) !important;
- }
+
  .language-selector{
      margin:0 1rem;
  }

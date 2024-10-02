@@ -1,5 +1,26 @@
 {
   "welcome": "خوش آمدید",
   "login": "ورود",
-  "register": "ثبت نام"
+  "register": "ثبت نام",
+  "Category": "دسته‌بندی",
+  "Flash Card": "فلش کارت",
+  "Last Month": "ماه گذشته",
+  "Last 3 Day": "سه روز گذشته",
+  "New Card": "کارت جدید",
+  "All Category": "تمام دسته ها",
+  "Select a category...": "یک دسته‌بندی انتخاب کنید...",
+  "Base Language": "زبان پایه",
+  "Translation Language": "زبان ترجمه",
+  "Front Word": "کلمه جلو",
+  "Back Word": "کلمه پشت",
+  "Level": "سطح",
+  "Guest": "Guest",
+  "Profile": "پروفایل",
+  "Settings": "تنظیمات",
+  "Sign-out": "خروج",
+  "Creating...": "در حال ایجاد...",
+  "Create Flashcard": "ایجاد فلش کارت",
+  "Create a new flashcard": "ایجاد فلش کارت",
+  "Error fetching categories.": "خطا در دریافت دسته‌بندی‌ها.",
+  "Error creating flashcard.": "خطا در ایجاد فلش کارت."
 }
