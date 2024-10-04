@@ -13,7 +13,8 @@ import { useContext } from 'react';
 import MainContent from "./components/MainContent";
 import { useTranslation } from 'react-i18next';
 import './i18n'; // Import the i18n configuration
-
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const ProtectedRoute = () => {
     const { isAuthenticated, loading } = useContext(AuthContext);
     if (loading) return <div>Loading...</div>;
@@ -59,6 +60,8 @@ const App = () => {
                         {/* مسیرهای نامشخص */}
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
+                    <ToastContainer />
+
                 </div>
             </Router>
         </AuthProvider>

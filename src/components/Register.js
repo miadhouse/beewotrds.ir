@@ -4,7 +4,8 @@ import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import styles from "../assets/landing.module.css";
 import { useTranslation } from 'react-i18next';
-
+import { toast } from 'react-toastify'; // Only import toast
+import 'react-toastify/dist/ReactToastify.css';
 const Register = () => {
     const [userName, setUserName] = useState('');
     const [email, setEmail] = useState('');
@@ -25,13 +26,13 @@ const Register = () => {
         setIsLoading(true);
 
         if (password !== confirmPassword) {
-            setError(t('passwordMismatch'));
+            toast.error(t('passwordMismatch') || 'Passwords do not match.');
             setIsLoading(false);
             return;
         }
 
         if (!recaptchaToken) {
-            setError(t('completeRecaptcha'));
+            toast.error(t('completeRecaptcha') || 'Please complete the reCAPTCHA.');
             setIsLoading(false);
             return;
         }
@@ -45,10 +46,11 @@ const Register = () => {
                 recaptchaToken,
             });
 
-            const { status, message: serverMessage, errors } = response.data;
+            const { status } = response.data;
 
             if (status === 201) {
-                setMessage(t('registrationSuccess'));
+                toast.success(t('registrationSuccess') || 'Registration successful!');
+                // Reset form fields
                 setUserName('');
                 setEmail('');
                 setPassword('');
@@ -56,21 +58,26 @@ const Register = () => {
                 setMobile('');
                 setRecaptchaToken(null);
                 recaptchaRef.current.reset();
-            } else if (status === 400 && errors) {
-                const errorMessages = Object.values(errors).join(' ');
-                setError(errorMessages);
-            } else if (status === 409) {
-                setError(serverMessage);
-            } else {
-                setError(t('unexpectedError'));
             }
         } catch (err) {
-            setError(t('serverConnectionError'));
+            if (err.response) {
+                const { status, data } = err.response;
+
+                if (status === 400 && data.errors) {
+                    const errorMessages = Object.values(data.errors).join(' ');
+                    toast.error(errorMessages);
+                } else if (status === 409) {
+                    toast.error(data.message || t('emailExists') || 'Email already exists.');
+                } else {
+                    toast.error(data.message || t('unexpectedError') || 'An unexpected error occurred.');
+                }
+            } else {
+                toast.error(t('serverConnectionError') || 'Could not connect to the server. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
     };
-
     const handleRecaptcha = (token) => {
         setRecaptchaToken(token);
     };

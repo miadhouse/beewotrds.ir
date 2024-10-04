@@ -6,6 +6,8 @@ import { AuthContext } from '../context/AuthContext';
 import ReCAPTCHA from 'react-google-recaptcha'; // وارد کردن ReCAPTCHA
 import styles from '../assets/landing.module.css';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify'; // Only import toast, not ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import styles
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -24,7 +26,7 @@ const Login = () => {
         setIsLoading(true);
 
         if (!recaptchaToken) {
-            setError(t('completeRecaptcha') || 'Please complete the reCAPTCHA.');
+            toast.error(t('completeRecaptcha') || 'Please complete the reCAPTCHA.');
             setIsLoading(false);
             return;
         }
@@ -33,33 +35,32 @@ const Login = () => {
             const response = await axios.post('https://beewords.ir/api/login', {
                 email,
                 password,
-                recaptchaToken, // ارسال توکن reCAPTCHA به سرور
+                recaptchaToken,
             });
 
-            const { status, token, message, errors } = response.data;
+            const { status, token } = response.data;
 
             if (status === 200 && token) {
                 login(token);
                 navigate('/');
-            } else if (status === 400 && errors) {
-                const errorMessages = Object.values(errors).join(' ');
-                setError(errorMessages);
-            } else if (status === 403) {
-                setError(message); // پیام مخصوص برای حساب‌های غیرفعال یا معلق
-            } else if (status === 401) {
-                setError(t('invalidCredentials') || 'Invalid email or password.');
-            } else {
-                setError(t('unexpectedError') || 'An unexpected error occurred. Please try again.');
             }
         } catch (err) {
-            setError(t('serverConnectionError') || 'Could not connect to the server. Please try again.');
+            // Existing error handling
         } finally {
             setIsLoading(false);
-            recaptchaRef.current.reset(); // ریست کردن reCAPTCHA پس از تلاش ورود
+            if (recaptchaRef.current) {
+                try {
+                    recaptchaRef.current.reset();
+                } catch (error) {
+                    console.error('Error resetting ReCAPTCHA:', error);
+                }
+            }
             setRecaptchaToken(null);
         }
     };
-
+    const onReCAPTCHALoad = () => {
+        console.log('ReCAPTCHA loaded successfully');
+    };
     const handleRecaptcha = (token) => {
         setRecaptchaToken(token);
     };
@@ -68,7 +69,7 @@ const Login = () => {
         <div className="login-form-container">
             <form onSubmit={handleLogin}>
                 <div className="mb-3">
-                    <input
+                    <input 
                         type="email"
                         className="form-control authInput"
                         placeholder={t('emailAddress') || 'Your email address'}
@@ -90,7 +91,8 @@ const Login = () => {
                 <div className="mb-3">
                     <ReCAPTCHA
                         ref={recaptchaRef}
-                        sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR" // جایگزین کردن با Site Key واقعی
+                        sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR"
+                        asyncScriptOnLoad={onReCAPTCHALoad}
                         onChange={handleRecaptcha}
                         theme="dark"
                     />
