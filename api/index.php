@@ -18,7 +18,7 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // بررسی وجود RECAPTCHA_SECRET_KEY
-if (!isset($_ENV['6LdypVMqAAAAALEMKytEtDHnHPxGKcLkaz_-R_CU']) || empty($_ENV['RECAPTCHA_SECRET_KEY'])) {
+if (!isset($_ENV['RECAPTCHA_SECRET_KEY']) || empty($_ENV['RECAPTCHA_SECRET_KEY'])) {
     throw new \Exception('RECAPTCHA_SECRET_KEY is not set in the environment variables.');
 }
 
