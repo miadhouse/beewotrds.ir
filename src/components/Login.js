@@ -3,26 +3,26 @@ import React, { useState, useContext, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import ReCAPTCHA from 'react-google-recaptcha'; // وارد کردن ReCAPTCHA
+import ReCAPTCHA from 'react-google-recaptcha';
 import styles from '../assets/landing.module.css';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify'; // Only import toast, not ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Import styles
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [recaptchaToken, setRecaptchaToken] = useState(null); // متغیر حالت برای توکن reCAPTCHA
-    const [error, setError] = useState('');
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const recaptchaRef = useRef(null); // ریفرنس برای ریست کردن reCAPTCHA
+    const recaptchaRef = useRef(null);
     const navigate = useNavigate();
     const { login } = useContext(AuthContext);
     const { t } = useTranslation();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');
         setIsLoading(true);
 
         if (!recaptchaToken) {
@@ -33,8 +33,7 @@ const Login = () => {
 
         try {
             const response = await axios.post('https://beewords.ir/api/login', {
-                email,
-                password,
+                ...formData,
                 recaptchaToken,
             });
 
@@ -43,9 +42,25 @@ const Login = () => {
             if (status === 200 && token) {
                 login(token);
                 navigate('/');
+            } else {
+                toast.error(t('unexpectedError') || 'An unexpected error occurred.');
             }
         } catch (err) {
-            // Existing error handling
+            if (err.response) {
+                const { status, data } = err.response;
+                if (status === 401 || status === 403) {
+                    toast.error(data.message || t('invalidCredentials') || 'Invalid email or password.');
+                } else if (status === 400 && data.errors) {
+                    // Display field-specific errors using toast
+                    Object.values(data.errors).forEach((errorMsg) => {
+                        toast.error(errorMsg);
+                    });
+                } else {
+                    toast.error(data.message || t('unexpectedError') || 'An unexpected error occurred.');
+                }
+            } else {
+                toast.error(t('serverConnectionError') || 'Could not connect to the server. Please try again.');
+            }
         } finally {
             setIsLoading(false);
             if (recaptchaRef.current) {
@@ -58,46 +73,53 @@ const Login = () => {
             setRecaptchaToken(null);
         }
     };
+
     const onReCAPTCHALoad = () => {
         console.log('ReCAPTCHA loaded successfully');
     };
+
     const handleRecaptcha = (token) => {
         setRecaptchaToken(token);
+    };
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     return (
         <div className="login-form-container">
             <form onSubmit={handleLogin}>
                 <div className="mb-3">
-                    <input 
+                    <input
                         type="email"
+                        name="email"
                         className="form-control authInput"
                         placeholder={t('emailAddress') || 'Your email address'}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                     />
                 </div>
                 <div className="mb-3">
                     <input
                         type="password"
+                        name="password"
                         className="form-control authInput"
                         placeholder={t('enterPassword') || 'Enter password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={formData.password}
+                        onChange={handleChange}
                         required
                     />
                 </div>
                 <div className="mb-3">
                     <ReCAPTCHA
                         ref={recaptchaRef}
-                        sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR"
+                        sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR" // Replace with your actual site key
                         asyncScriptOnLoad={onReCAPTCHALoad}
                         onChange={handleRecaptcha}
                         theme="dark"
                     />
                 </div>
-                {error && <p className="text-danger text-center">{error}</p>}
                 <button type="submit" disabled={isLoading} className={styles.pushable}>
                     <span className={styles.shadow}></span>
                     <span className={styles.edge}></span>

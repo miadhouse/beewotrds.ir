@@ -7,7 +7,7 @@ import Register from './Register';
 import '../assets/AuthPage.css';
 import { AuthContext } from '../context/AuthContext';
 import Lottie from 'lottie-react';
-import splashAnimation from '../assets/splash.json';
+import splashAnimation from '../assets/splash2.json';
 import { useTranslation } from 'react-i18next';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Form from 'react-bootstrap/Form';

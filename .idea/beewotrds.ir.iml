@@ -10,11 +10,8 @@
       <sourceFolder url="file://$MODULE_DIR$/api/public/app" isTestSource="false" packagePrefix="App\" />
       <sourceFolder url="file://$MODULE_DIR$/api/public/src" isTestSource="false" packagePrefix="Miad\BeewordsApi\" />
       <sourceFolder url="file://$MODULE_DIR$/api/public/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/api/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/api/src" isTestSource="false" packagePrefix="Miad\BeewordsApi\" />
       <sourceFolder url="file://$MODULE_DIR$/api/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/doctrine/instantiator" />
       <excludeFolder url="file://$MODULE_DIR$/api/vendor/firebase/php-jwt" />

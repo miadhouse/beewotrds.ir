@@ -141,9 +141,8 @@ body {
     font-weight: 800 !important;
 }
 [dir='rtl'] .offcanvas-header {
-direction: ltr;
+    direction: ltr;
 }
-
 
 .center {
     margin: 0 auto;
@@ -617,7 +616,7 @@ direction: ltr;
     width: 100%;
     height: 100vh;
     overflow: hidden;
-    background: #ffcb00;
+    background: #e9e9e9;
 }
 
 .lottie-background {
@@ -661,7 +660,7 @@ direction: ltr;
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
     background: #fff;
     color: #494949;
-    background: linear-gradient(180deg, #00000045, #ffc400);
+    background: linear-gradient(180deg, #00000045, #e9e9e9);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#ffffff", endColorstr="#ffc400", GradientType=1);
 }
 

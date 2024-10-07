@@ -115,9 +115,9 @@ class RequestValidator
 
     public function validateLanguage(?string $language, string $fieldName = 'Language'): void
     {
-        $allowedLanguages = ['en', 'es', 'fr', 'de', 'it', 'fa', 'ar', 'zh', 'jp']; // Extend as needed
+        $allowedLanguages = ['en', 'es', 'fr', 'de', 'it', 'fa', 'ar', 'zh', 'jp'];
 
-        if (empty($language) || !in_array(strtolower($language), $allowedLanguages)) {
+        if ($language !== null && !in_array(strtolower($language), $allowedLanguages)) {
             $this->errors[$fieldName] = "Valid $fieldName is required.";
         }
     }
