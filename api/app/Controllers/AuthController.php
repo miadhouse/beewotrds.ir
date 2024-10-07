@@ -44,6 +44,9 @@ class AuthController
         $this->validationMiddleware = new ValidationMiddleware($this->validator);
     }
 
+    /**
+     * @throws ApiException
+     */
     public function register($request): array
     {
         // قوانین اعتبارسنجی
@@ -52,8 +55,6 @@ class AuthController
             'password' => ['required', 'password'],
             'userName' => ['required', 'username'],
             'mobile' => ['required', 'mobile'],
-            'language' => ['language'],
-            // می‌توانید فیلدهای اضافی را اضافه کنید
         ];
 
         // انجام اعتبارسنجی با Middleware
@@ -88,7 +89,7 @@ class AuthController
             'role' => 'user',
             'email' => $request['email'],
             'mobile' => $request['mobile'],
-            'language' => $request['language'] ?? 'en',
+            'language' => 'en', // Set default language
             'age' => $request['age'] ?? null,
             'imageProfile' => $request['imageProfile'] ?? null,
             'password' => $hashedPassword,
@@ -99,7 +100,7 @@ class AuthController
         ]);
 
         // ایجاد لینک تأیید ایمیل
-        $verificationLink = "http://localhost:3000/verify?code=$verificationCode";
+        $verificationLink = "https://beewords.ir/verify?code=$verificationCode";
         $emailSubject = 'Verify your email';
         $emailBody = "
             <p>Hi {$request['userName']},</p>
@@ -114,6 +115,9 @@ class AuthController
         return ['status' => 201, 'message' => 'Registration successful. Please check your email to verify your account.'];
     }
 
+    /**
+     * @throws ApiException
+     */
     public function verifyEmail($request): array
     {
         // قوانین اعتبارسنجی

@@ -92,7 +92,7 @@ class User {
      * @return int|false
      */
     public function createUser(array $data) {
-        $sql = "INSERT INTO users (userName, role, email, mobile, language, age, imageProfile, password, verificationCode, verificationCodeExpiresAt, created_at, status) 
+        $sql = "INSERT INTO users (userName, role, email, mobile, age, imageProfile, password, verificationCode, verificationCodeExpiresAt, created_at, status) 
                 VALUES (:userName, :role, :email, :mobile, :language, :age, :imageProfile, :password, :verificationCode, :verificationCodeExpiresAt, :created_at, :status)";
         $this->db->query($sql);
         $this->db->bind(':userName', $data['userName']);
