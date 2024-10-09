@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
+
     const [formData, setFormData] = useState({
         userName: '',
         email: '',
@@ -17,12 +18,12 @@ const Register = () => {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [recaptchaToken, setRecaptchaToken] = useState(null);
-    const recaptchaRef = useRef(null);
+    const recaptchaRef = useRef();
     const { t } = useTranslation();
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
+        console.log('Sending recaptcha_token:', recaptchaToken);
 
         if (formData.password !== formData.confirmPassword) {
             toast.error(t('passwordMismatch') || 'Passwords do not match.');
