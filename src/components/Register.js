@@ -38,18 +38,18 @@ const Register = () => {
 
         try {
             const response = await axios.post('https://beewords.ir/api/register', {
-                userName: formData.userName,
+                name: formData.userName, // Changed field name
                 email: formData.email,
                 password: formData.password,
+                password_confirmation: formData.confirmPassword, // Added password_confirmation
                 mobile: formData.mobile,
-                recaptchaToken,
+                recaptcha_token: recaptchaToken, // Changed field name
             });
 
-            const { status } = response.data;
-
-            if (status === 201) {
+            // Assuming the backend returns status code 200 on success
+            if (response.status === 200) {
                 toast.success(t('registrationSuccess') || 'Registration successful!');
-                // ریست کردن فرم
+                // Reset the form
                 setFormData({
                     userName: '',
                     email: '',
@@ -57,19 +57,18 @@ const Register = () => {
                     confirmPassword: '',
                     mobile: '',
                 });
-                // ریست کردن reCAPTCHA در بلوک finally انجام می‌شود
             }
         } catch (err) {
             if (err.response) {
                 const { status, data } = err.response;
 
-                if (status === 400 && data.errors) {
-                    // نمایش هر پیام خطا به صورت جداگانه
-                    Object.values(data.errors).forEach((errorMessage) => {
-                        toast.error(errorMessage);
+                if (status === 422 && data.errors) {
+                    // Display each validation error
+                    Object.values(data.errors).forEach((errorMessages) => {
+                        errorMessages.forEach((errorMessage) => {
+                            toast.error(errorMessage);
+                        });
                     });
-                } else if (status === 409) {
-                    toast.error(data.message || t('emailExists') || 'Email already exists.');
                 } else {
                     toast.error(data.message || t('unexpectedError') || 'An unexpected error occurred.');
                 }
@@ -151,11 +150,7 @@ const Register = () => {
                         required
                     />
                 </div>
-                <input
-                    type="hidden"
-                    name="language"
-                    value="en"
-                />
+                <input type="hidden" name="language" value="en" />
                 <div className="mb-3">
                     <ReCAPTCHA
                         ref={recaptchaRef}
@@ -168,8 +163,8 @@ const Register = () => {
                     <span className={styles.shadow}></span>
                     <span className={styles.edge}></span>
                     <span className={`${styles.front} authPushBtn`}>
-                        {isLoading ? t('registering') || 'Registering...' : t('register') || 'Register'}
-                    </span>
+            {isLoading ? t('registering') || 'Registering...' : t('register') || 'Register'}
+          </span>
                 </button>
             </form>
         </div>
