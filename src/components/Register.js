@@ -37,7 +37,7 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post('https://beewords.ir/api/register', {
+            const response = await axios.post('https://api.beewords.ir/api/register', {
                 name: formData.userName, // Changed field name
                 email: formData.email,
                 password: formData.password,
