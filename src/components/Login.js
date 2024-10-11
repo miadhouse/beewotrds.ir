@@ -37,6 +37,8 @@ const Login = () => {
                 email: formData.email,
                 password: formData.password,
                 recaptcha_token: recaptchaToken,
+            }, {
+                timeout: 10000, // تنظیم تایم‌اوت به 10 ثانیه
             });
 
             const { status, token, message } = response.data;
@@ -48,7 +50,10 @@ const Login = () => {
                 toast.error(message || t('unexpectedError') || 'An unexpected error occurred.');
             }
         } catch (err) {
-            if (err.response) {
+            if (err.code === 'ECONNABORTED') {
+                // خطای تایم‌اوت
+                toast.error('The request timed out. Please try again.');
+            } else if (err.response) {
                 const { status, data } = err.response;
                 if (status === 404) {
                     toast.error(data.message || t('userNotFound') || 'User not found.');
