@@ -3,7 +3,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 import api from '../utils/api';
 
-export const AuthContext = createContext();
+export const AuthContext = createContext({
+    user: null,
+    isAuthenticated: false,
+    loading: true,
+    login: () => {},
+    logout: () => {},
+});
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -17,8 +23,9 @@ export const AuthProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            if (response.status === 200) {
-                setUser(response.data.data);
+            console.log('AuthContext.js - API response:', response.data); // برای عیب‌یابی
+            if (response.status === 200 && response.data.user) {
+                setUser(response.data.user); // اصلاح شده
                 setIsAuthenticated(true);
             }
         } catch (error) {
