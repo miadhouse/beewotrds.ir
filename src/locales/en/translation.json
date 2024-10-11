@@ -21,5 +21,16 @@
   "Creating...": "Creating...",
   "Create Flashcard": "Create Flashcard",
   "Error fetching categories.": "Error fetching categories.",
-  "Error creating flashcard.": "Error creating flashcard."
+  "Error creating flashcard.": "Error creating flashcard.",
+  "userNotFound": "User not found.",
+  "invalidCredentials": "Invalid email or password.",
+  "completeRecaptcha": "Please complete the reCAPTCHA.",
+  "unexpectedError": "An unexpected error occurred.",
+  "serverConnectionError": "Could not connect to the server. Please try again.",
+  "emailAddress": "Your email address",
+  "enterPassword": "Enter password",
+  "loggingIn": "Logging in...",
+  "emailVerificationIncomplete": "Your email verification is not completed.",
+
+  "recoverPassword": "Recover Password"
 }

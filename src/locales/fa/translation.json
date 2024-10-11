@@ -23,5 +23,16 @@
   "Create Flashcard": "ایجاد فلش کارت",
   "Create a new flashcard": "ایجاد فلش کارت",
   "Error fetching categories.": "خطا در دریافت دسته‌بندی‌ها.",
-  "Error creating flashcard.": "خطا در ایجاد فلش کارت."
+  "Error creating flashcard.": "خطا در ایجاد فلش کارت.",
+  "userNotFound": "کاربری یافت نشد.",
+  "invalidCredentials": "ایمیل یا رمز عبور نامعتبر است.",
+  "completeRecaptcha": "لطفاً reCAPTCHA را تکمیل کنید.",
+  "unexpectedError": "خطای غیرمنتظره رخ داده است.",
+  "serverConnectionError": "امکان اتصال به سرور وجود ندارد. لطفاً دوباره تلاش کنید.",
+  "emailAddress": "آدرس ایمیل شما",
+  "enterPassword": "رمز عبور را وارد کنید",
+  "loggingIn": "در حال ورود...",
+  "emailVerificationIncomplete": "تأیید ایمیل شما تکمیل نشده است.",
+
+  "recoverPassword": "بازیابی رمز عبور"
 }

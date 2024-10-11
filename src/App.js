@@ -1,4 +1,5 @@
 // src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import Header from './components/Header';
@@ -12,9 +13,10 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 import { useContext } from 'react';
 import MainContent from "./components/MainContent";
 import { useTranslation } from 'react-i18next';
-import './i18n'; // Import the i18n configuration
+import './i18n';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 const ProtectedRoute = () => {
     const { isAuthenticated, loading } = useContext(AuthContext);
     if (loading) return <div>Loading...</div>;
@@ -61,7 +63,6 @@ const App = () => {
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
                     <ToastContainer />
-
                 </div>
             </Router>
         </AuthProvider>

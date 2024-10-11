@@ -1,6 +1,6 @@
 // src/hooks/useFlashcardCount.js
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../utils/api'; // استفاده از api instance
 import { AuthContext } from '../context/AuthContext';
 
 const useFlashcardCount = () => {
@@ -13,7 +13,7 @@ const useFlashcardCount = () => {
             if (isAuthenticated) {
                 const token = localStorage.getItem('token');
                 try {
-                    const response = await axios.get('https://beewords.ir/api/flashcards/count', {
+                    const response = await api.get('/flashcards/count', { // استفاده از مسیر صحیح
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },

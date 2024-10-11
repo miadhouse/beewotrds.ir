@@ -138,10 +138,13 @@ body {
 
 [dir='rtl'] * {
     font-family: 'Yekan Bakh', sans-serif !important;
-    font-weight: 800 !important;
+    font-weight: 500 !important;
 }
 [dir='rtl'] .offcanvas-header {
     direction: ltr;
+}
+[dir='rtl'] small {
+    font-weight: bolder !important;
 }
 
 .center {

@@ -1,56 +1,94 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+// src/components/VerifyPage.js
 
-const VerifyEmail = () => {
-    const [verificationCode, setVerificationCode] = useState('');
+import React, { useEffect, useState, useContext } from 'react';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { AuthContext } from '../context/AuthContext';
+
+const VerifyPage = () => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { setUser } = useContext(AuthContext); // اضافه کردن setUser
 
-    const handleVerify = async (e) => {
-        e.preventDefault();
-        setError('');
-        setMessage('');
-        setIsLoading(true);
+    // استخراج پارامترهای کوئری
+    const queryParams = new URLSearchParams(location.search);
+    const id = queryParams.get('id');
+    const hash = queryParams.get('hash');
+    const expires = queryParams.get('expires');
+    const signature = queryParams.get('signature');
 
-        try {
-            const response = await axios.post('https://beewords.ir/api/verify', { code: verificationCode });
-            const { status, message } = response.data;
+    useEffect(() => {
+        const handleVerify = async () => {
+            setError('');
+            setMessage('');
+            setIsLoading(true);
 
-            if (status === 200) {
-                setMessage('Email verified successfully! You can now log in.');
-            } else {
-                setError(message);
+            if (!id || !hash || !expires || !signature) {
+                setError('Invalid verification link.');
+                setIsLoading(false);
+                return;
             }
-        } catch (err) {
-            setError('Failed to connect to the server. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+
+            try {
+                // ارسال درخواست GET به بک‌اند برای تأیید ایمیل
+                const response = await axios.get(`https://api.beewords.ir/api/email/verify/${id}/${hash}`, {
+                    params: {
+                        expires,
+                        signature,
+                    },
+                });
+
+                if (response.data.status) {
+                    setMessage('Email verified successfully! Redirecting to main page...');
+
+                    // بروزرسانی اطلاعات کاربر
+                    try {
+                        const profileResponse = await axios.get('https://api.beewords.ir/api/profile', {
+                            withCredentials: true,
+                        });
+                        setUser(profileResponse.data.user);
+                    } catch (profileError) {
+                        console.error('Failed to fetch user profile after verification:', profileError);
+                    }
+
+                    // هدایت به صفحه اصلی پس از ۲ ثانیه
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 2000);
+                } else {
+                    setError(response.data.message || 'Email verification failed.');
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || 'Verification failed. Please try again.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        handleVerify();
+    }, [id, hash, expires, signature, navigate, setUser]);
 
     return (
         <div className="verify-container">
             <h2>Verify Email</h2>
-            <form onSubmit={handleVerify}>
-                <div className="form-group">
-                    <label>Verification Code</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p className="text-danger">{error}</p>}
-                {message && <p className="text-success">{message}</p>}
-                <button type="submit" className="btn btn-primary" disabled={isLoading}>
-                    {isLoading ? 'Verifying...' : 'Verify'}
-                </button>
-            </form>
+            {isLoading ? (
+                <p>Verifying your email...</p>
+            ) : error ? (
+                <>
+                    <p className="text-danger">{error}</p>
+                    <button className="btn btn-secondary" onClick={() => navigate('/auth')} disabled={isLoading}>
+                        Go to Auth Page
+                    </button>
+                </>
+            ) : (
+                <p className="text-success">{message}</p>
+            )}
         </div>
     );
 };
 
-export default VerifyEmail;
+export default VerifyPage;

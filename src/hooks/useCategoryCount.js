@@ -1,5 +1,6 @@
+// src/hooks/useCategoryCount.js
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../utils/api'; // استفاده از api instance
 import { AuthContext } from '../context/AuthContext';
 
 const useCategoryCount = () => {
@@ -12,7 +13,7 @@ const useCategoryCount = () => {
             if (isAuthenticated) {
                 const token = localStorage.getItem('token');
                 try {
-                    const response = await axios.get('https://beewords.ir/api/categories/count', {
+                    const response = await api.get('/categories/count', { // استفاده از مسیر صحیح
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },

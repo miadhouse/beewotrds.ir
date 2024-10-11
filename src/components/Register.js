@@ -1,4 +1,5 @@
 // src/components/Register.js
+
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -6,9 +7,10 @@ import styles from '../assets/landing.module.css';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom'; // ایمپورت useNavigate
+import api from '../utils/api'; // Import API instance
 
 const Register = () => {
-
     const [formData, setFormData] = useState({
         userName: '',
         email: '',
@@ -20,10 +22,11 @@ const Register = () => {
     const [recaptchaToken, setRecaptchaToken] = useState(null);
     const recaptchaRef = useRef();
     const { t } = useTranslation();
+    const navigate = useNavigate(); // استفاده از useNavigate
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        console.log('Sending recaptcha_token:', recaptchaToken);
+        setIsLoading(true);
 
         if (formData.password !== formData.confirmPassword) {
             toast.error(t('passwordMismatch') || 'Passwords do not match.');
@@ -38,18 +41,21 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post('https://api.beewords.ir/api/register', {
-                name: formData.userName, // Changed field name
+            const response = await api.post('/register', {
+                name: formData.userName,
                 email: formData.email,
                 password: formData.password,
-                password_confirmation: formData.confirmPassword, // Added password_confirmation
+                password_confirmation: formData.confirmPassword,
                 mobile: formData.mobile,
-                recaptcha_token: recaptchaToken, // Changed field name
+                recaptcha_token: recaptchaToken,
             });
 
-            // Assuming the backend returns status code 200 on success
             if (response.status === 200) {
-                toast.success(t('registrationSuccess') || 'Registration successful!');
+                toast.success(t('registrationSuccess') || 'Registration successful! Please verify your email.');
+                // هدایت به صفحه اصلی
+                navigate('/');
+                // یا هدایت به صفحه‌ای خاص مانند /verify
+                // navigate('/verify');
                 // Reset the form
                 setFormData({
                     userName: '',
@@ -64,7 +70,7 @@ const Register = () => {
                 const { status, data } = err.response;
 
                 if (status === 422 && data.errors) {
-                    // Display each validation error
+                    // نمایش هر خطای اعتبارسنجی
                     Object.values(data.errors).forEach((errorMessages) => {
                         errorMessages.forEach((errorMessage) => {
                             toast.error(errorMessage);
@@ -164,8 +170,8 @@ const Register = () => {
                     <span className={styles.shadow}></span>
                     <span className={styles.edge}></span>
                     <span className={`${styles.front} authPushBtn`}>
-            {isLoading ? t('registering') || 'Registering...' : t('register') || 'Register'}
-          </span>
+                        {isLoading ? t('registering') || 'Registering...' : t('register') || 'Register'}
+                    </span>
                 </button>
             </form>
         </div>

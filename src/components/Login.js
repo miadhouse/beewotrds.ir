@@ -1,6 +1,6 @@
 // src/components/Login.js
+
 import React, { useState, useContext, useRef } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -8,6 +8,7 @@ import styles from '../assets/landing.module.css';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../utils/api'; // Import API instance
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -32,26 +33,29 @@ const Login = () => {
         }
 
         try {
-            const response = await axios.post('https://beewords.ir/api/login', {
-                ...formData,
-                recaptchaToken,
+            const response = await api.post('/login', {
+                email: formData.email,
+                password: formData.password,
+                recaptcha_token: recaptchaToken,
             });
 
-            const { status, token } = response.data;
+            const { status, token, message } = response.data;
 
-            if (status === 200 && token) {
+            if (status === true && token) {
                 login(token);
                 navigate('/');
             } else {
-                toast.error(t('unexpectedError') || 'An unexpected error occurred.');
+                toast.error(message || t('unexpectedError') || 'An unexpected error occurred.');
             }
         } catch (err) {
             if (err.response) {
                 const { status, data } = err.response;
-                if (status === 401 || status === 403) {
+                if (status === 404) {
+                    toast.error(data.message || t('userNotFound') || 'User not found.');
+                } else if (status === 401) {
                     toast.error(data.message || t('invalidCredentials') || 'Invalid email or password.');
-                } else if (status === 400 && data.errors) {
-                    // Display field-specific errors using toast
+                } else if ((status === 400 || status === 422) && data.errors) {
+                    // نمایش خطاهای اعتبارسنجی
                     Object.values(data.errors).forEach((errorMsg) => {
                         toast.error(errorMsg);
                     });
@@ -72,10 +76,6 @@ const Login = () => {
             }
             setRecaptchaToken(null);
         }
-    };
-
-    const onReCAPTCHALoad = () => {
-        console.log('ReCAPTCHA loaded successfully');
     };
 
     const handleRecaptcha = (token) => {
@@ -114,8 +114,7 @@ const Login = () => {
                 <div className="mb-3">
                     <ReCAPTCHA
                         ref={recaptchaRef}
-                        sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR" // Replace with your actual site key
-                        asyncScriptOnLoad={onReCAPTCHALoad}
+                        sitekey="6LdypVMqAAAAALPf5RyL_jufQ08Qt2eEkL8uRemR" // کلید تست Google برای محیط توسعه
                         onChange={handleRecaptcha}
                         theme="dark"
                     />
